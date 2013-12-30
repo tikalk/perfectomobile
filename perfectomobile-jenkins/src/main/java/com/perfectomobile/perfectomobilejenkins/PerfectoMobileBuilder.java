@@ -5,6 +5,7 @@ import hudson.util.FormValidation;
 import hudson.util.Secret;
 import hudson.util.ListBoxModel;
 import hudson.model.AbstractBuild;
+import hudson.model.AutoCompletionCandidates;
 import hudson.model.BuildListener;
 import hudson.model.AbstractProject;
 import hudson.tasks.Builder;
@@ -16,6 +17,7 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.QueryParameter;
 
 import com.perfectomobile.perfectomobilejenkins.connection.rest.RestServices;
+import com.perfectomobile.perfectomobilejenkins.xml.XmlParser;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
@@ -25,7 +27,10 @@ import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 
 import javax.servlet.ServletException;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Sample {@link Builder}.
@@ -42,16 +47,20 @@ import java.io.IOException;
  * When a build is performed, the {@link #perform(AbstractBuild, Launcher, BuildListener)}
  * method will be invoked. 
  *
- * @author Kohsuke Kawaguchi
+ * @author Guy Michaelis
  */
 public class PerfectoMobileBuilder extends Builder {
-
-    private final String name;
+	
+	private final String name;
+    private final String perfectoCloud;
+    private final String autoScript;
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
-    public PerfectoMobileBuilder(String name) {
+    public PerfectoMobileBuilder(String name, String perfectoCloud, String autoScript) {
         this.name = name;
+        this.perfectoCloud = perfectoCloud;
+        this.autoScript = autoScript;
     }
 
     /**
@@ -60,18 +69,25 @@ public class PerfectoMobileBuilder extends Builder {
     public String getName() {
         return name;
     }
+    
+    public String getPerfectoCloud() {
+        return perfectoCloud;
+    }
+    
+    public String getAutoScript() {
+        return autoScript;
+    }
 
     @Override
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
-        // This is where you 'build' the project.
 
-        // This also shows how you can consult the global configuration of the builder
     	ClientResponse perfectoResponse = null;
     			
     	try {
-        	perfectoResponse = RestServices.getRepoScripts(getDescriptor().getUrl(), 
+        	perfectoResponse = RestServices.getInstance().getRepoScriptsItems(getDescriptor().getUrl(), 
 					getDescriptor().getAccessId(), 
-					 Secret.toString(getDescriptor().getSecretKey()));
+					 Secret.toString(getDescriptor().getSecretKey()),
+					 autoScript);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -101,8 +117,8 @@ public class PerfectoMobileBuilder extends Builder {
     public DescriptorImpl getDescriptor() {
         return (DescriptorImpl)super.getDescriptor();
     }
-
-    /**
+    
+     /**
      * Descriptor for {@link PerfectoMobileBuilder}. Used as a singleton.
      * The class is marked as public so that it can be accessed from views.
      *
@@ -123,7 +139,8 @@ public class PerfectoMobileBuilder extends Builder {
         private String url;
         private String username;
         private Secret password;
-
+        
+        
         /**
          * In order to load the persisted global configuration, you have to 
          * call load() in the constructor.
@@ -150,16 +167,53 @@ public class PerfectoMobileBuilder extends Builder {
         }
         
         /**
-         * Get clouds names
-         * @return
+         * Get clouds names. Might be more than one cloud in the future.
+         * @return Cloud Items
          */
-        public ListBoxModel doFillGoalTypeItems() {
+        public ListBoxModel doFillPerfectoCloudItems() {
             ListBoxModel items = new ListBoxModel();
-            //for (BuildGoal goal : getBuildGoals()) {
-                //items.add(goal.getDisplayName(), goal.getId());
-            items.add(getName());
-           //}
+            
+            items.add(getLogicalName());
             return items;
+        }
+        
+        public ListBoxModel doFillDeviceIdItems() {
+            ListBoxModel items = new ListBoxModel();
+            
+            ClientResponse perfectoResponse = null;
+            try {
+				perfectoResponse = RestServices.getInstance().getHandsets(getUrl(), getAccessId(), 
+						 Secret.toString(getSecretKey()));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ServletException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+            
+            File resultFile = perfectoResponse.getEntity(File.class);
+            List<String> devices = XmlParser.getInstance().getXmlElements(resultFile, XmlParser.DEVICEID_ELEMENT_NAME);
+            
+            
+            for (int i=0; i<devices.size();i++) {
+            	items.add(devices.get(i));
+            }
+
+            return items;
+        }
+        
+        
+        public AutoCompletionCandidates doAutoCompleteAutoScript(@QueryParameter String value) {
+            AutoCompletionCandidates c = new AutoCompletionCandidates();
+            
+          //Holds all Perfecto scripts
+           String [] scripts = PMScripts.getInstance().getAllScripts(url, username, Secret.toString(password));
+            
+            for (String script : scripts)
+                if (script.toLowerCase().startsWith(value.toLowerCase()))
+                    c.add(script);
+            return c;
         }
 
         public boolean isApplicable(Class<? extends AbstractProject> aClass) {
@@ -168,7 +222,7 @@ public class PerfectoMobileBuilder extends Builder {
         }
 
         /**
-         * This human readable name is used in the configuration screen.
+         * This human readable name is used in the configuration screen.getName
          */
         public String getDisplayName() {
             return "Perfecto Mobile Build Step";
@@ -192,7 +246,7 @@ public class PerfectoMobileBuilder extends Builder {
          * The method name is bit awkward because global.jelly calls this method to determine
          * the initial state of the control by the naming convention.
          */
-        public String getName() {
+        public String getLogicalName() {
             return logicalName;
         }
         
@@ -206,35 +260,30 @@ public class PerfectoMobileBuilder extends Builder {
             return password;
         }
         
-        private static WebResource getService(final String url, final String user,
-                final Secret password) {
-        // setup REST-Client
-        ClientConfig config = new DefaultClientConfig();
-        Client client = Client.create(config);
-        client.addFilter( new HTTPBasicAuthFilter(user, Secret.toString( password ) ) ); 
-        WebResource service = client.resource( url );
-        return service;
-}
-        
         public FormValidation doTestConnection(
         		@QueryParameter("url") final String url,
         		@QueryParameter("accessId") final String accessId,
                 @QueryParameter("secretKey") final String secretKey) throws IOException, ServletException {
             
         	// setup REST-Client
-        	WebResource service = getService(url, accessId, Secret.fromString( secretKey ) );
-            ClientResponse perfectoStatus = service.path("services").path("handsets").
-        			queryParam("operation", "list").
-        			queryParam("availableTo", accessId).
-        			queryParam("user", accessId).
-        			queryParam("password", secretKey).
-        			queryParam("inUse", "false").
-        			get(ClientResponse.class);
-            if( perfectoStatus.getStatus() == 200 ) {
+        	ClientResponse perfectoResponse = null;
+        	
+        	try {
+            	perfectoResponse = RestServices.getInstance().getHandsets(url, accessId, secretKey);
+    		} catch (IOException e) {
+    			// TODO Auto-generated catch block
+    			e.printStackTrace();
+    		} catch (ServletException e) {
+    			// TODO Auto-generated catch block
+    			e.printStackTrace();
+    		}
+        	
+        	if( perfectoResponse.getStatus() == 200 ) {
                     return FormValidation.ok("Success. Connection with perfecto mobile verified.");
             }
-            return FormValidation.error("Failed. Please check the configuration. HTTP Status: " + perfectoStatus);
+            return FormValidation.error("Failed. Please check the configuration. HTTP Status: " + perfectoResponse);
         }
+        
     }
 }
 

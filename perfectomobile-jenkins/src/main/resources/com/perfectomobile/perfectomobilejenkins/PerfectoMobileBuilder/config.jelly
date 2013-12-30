@@ -1,4 +1,4 @@
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:p="/lib/hudson/project">
   <!--
     This jelly script is used for per-project configuration.
 
@@ -9,15 +9,23 @@
     <f:textbox />
   </f:entry>
   
-  <!--f:entry name="goalType" title="Choose Perfecto Mobile cloud" field="goalType">
-    <select name="goalType">
-        <option value="buildGoal">Build Goal</option>
-        <option value="findBugsGoal">FindBugs goal</option>
-    </select>
-  </f:entry-->
-  
-  <f:entry field="goalType" title="Choose Perfecto Cloud">
+  <f:entry field="perfectoCloud" title="Choose Perfecto Cloud">
    <f:select />
-</f:entry>
-
+  </f:entry>
+  <f:entry title="Automation Script" field="autoScript">
+    <f:textbox />
+  </f:entry>
+  
+  <f:advanced>
+    <f:entry title="String Type">
+      <f:textbox name="stringType"/>
+    </f:entry>
+    <f:entry title="Number Type">
+      <f:textbox clazz="number" name="numberType" value="${fruit.seeds}"/>
+    </f:entry>
+    <f:entry field="deviceId" title="Device" description="Device ID">
+      <f:select />
+    </f:entry>
+  </f:advanced>
+ 
 </j:jelly>

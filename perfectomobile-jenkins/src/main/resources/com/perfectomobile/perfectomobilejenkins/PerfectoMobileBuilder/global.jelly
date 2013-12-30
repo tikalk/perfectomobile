@@ -12,20 +12,30 @@
     so it should be straightforward to find them.
   -->
   <f:section title="Perfecto MobileCloud">
-    <f:entry title="${%Perfecto MobileCloud Name}" field="name" description="Define logical name">
-      <f:textbox/>
-    </f:entry>
-    <f:entry title="${%MobileCloud URL}" field="url" description="Cloud URL">
-      <f:textbox/>	
-    </f:entry>
-    <f:entry title="${%Username}" field="accessId">
-      <f:textbox/>
-    </f:entry>
-    <f:entry title="${%Password}" field="secretKey">
-      <f:password/>
-    </f:entry>
-    <f:validateButton
-       title="${%Test Connection}" progress="${%Testing...}"
-       method="testConnection" with="url,secretKey,accessId" />
+  	 <!--f:repeatable field="phaseJobs" noAddButton="true" minimum="1">
+                            <table width="100%"-->
+  	    <f:entry title="${%Perfecto MobileCloud Name}" field="logicalName" description="Define logical name">
+	      <f:textbox/>
+	    </f:entry>
+	    <f:entry title="${%MobileCloud URL}" field="url" description="Cloud URL">
+	      <f:textbox/>	
+	    </f:entry>
+	    <f:entry title="${%Username}" field="accessId">
+	      <f:textbox/>
+	    </f:entry>
+	    <f:entry title="${%Password}" field="secretKey">
+	      <f:password/>
+	    </f:entry>
+	    <f:validateButton
+	       title="${%Test Connection}" progress="${%Testing...}"
+	       method="testConnection" with="url,secretKey,accessId" />
+	    <!--f:entry>
+                          <div align="right">
+                            <input type="button" value="${%Add jobs...}" class="repeatable-add show-if-last" />
+                            <input type="button" value="${%Delete}" class="repeatable-delete show-if-not-only" style="margin-left: 1em;" />
+                          </div>
+                        </f:entry>
+                        </table>
+                    </f:repeatable-->
   </f:section>
 </j:jelly>
