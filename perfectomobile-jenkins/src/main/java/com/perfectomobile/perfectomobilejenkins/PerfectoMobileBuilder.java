@@ -264,6 +264,27 @@ public class PerfectoMobileBuilder extends Builder {
             return password;
         }
         
+        /**
+         * Check if an element exists in the response.
+         * @param perfectoResponse
+         * @param element
+         * @return
+         */
+        private boolean isElementExists(ClientResponse perfectoResponse, String element){
+   		 
+	   		 boolean isExists=true;
+	   		 
+	   		 File resultFile = perfectoResponse.getEntity(File.class);
+	   		 
+	   		 String item = XmlParser.getInstance().getXmlFirstElement(resultFile, element);
+	   		 
+	   		 if (item==null || item.isEmpty())
+	   			 isExists=false;
+	   		 
+	   		 return isExists;
+   		 
+   	 	}
+        
         public FormValidation doTestConnection(
         		@QueryParameter("url") final String url,
         		@QueryParameter("accessId") final String accessId,
@@ -282,7 +303,7 @@ public class PerfectoMobileBuilder extends Builder {
     			e.printStackTrace();
     		}
         	
-        	if( perfectoResponse.getStatus() == 200 ) {
+        	if( perfectoResponse.getStatus() == 200) {
                     return FormValidation.ok("Success. Connection with perfecto mobile verified.");
             }
             return FormValidation.error("Failed. Please check the configuration. HTTP Status: " + perfectoResponse);
