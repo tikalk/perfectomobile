@@ -194,10 +194,14 @@ public class PerfectoMobileBuilder extends Builder {
             
             File resultFile = perfectoResponse.getEntity(File.class);
             List<String> devices = XmlParser.getInstance().getXmlElements(resultFile, XmlParser.DEVICEID_ELEMENT_NAME);
-            
+            List<String> manufacturer = XmlParser.getInstance().getXmlElements(resultFile, XmlParser.MANUFACTURER_ELEMENT_NAME);
+            List<String> location = XmlParser.getInstance().getXmlElements(resultFile, XmlParser.LOCATION_ELEMENT_NAME);
+            List<String> model = XmlParser.getInstance().getXmlElements(resultFile, XmlParser.MODEL_ELEMENT_NAME);
             
             for (int i=0; i<devices.size();i++) {
-            	items.add(devices.get(i));
+            	StringBuffer itemDetails=new StringBuffer();
+            	itemDetails.append(manufacturer.get(i)).append("-").append(model.get(i)).append("-").append(location.get(i)).append("-").append(devices.get(i));
+            	items.add(itemDetails.toString());
             }
 
             return items;
@@ -232,7 +236,7 @@ public class PerfectoMobileBuilder extends Builder {
         public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
             // To persist global configuration information,
             // set that to properties and call save().
-            logicalName=formData.getString("name");
+            logicalName=formData.getString("logicalName");
             url = formData.getString("url");
             username = formData.getString("accessId");
             password = Secret.fromString(formData.getString("secretKey"));
