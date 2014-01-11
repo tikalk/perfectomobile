@@ -1,16 +1,17 @@
 package com.perfectomobile.perfectomobilejenkins.connection.rest;
 
 import java.io.IOException;
-import java.util.ArrayList;
-
+import java.util.StringTokenizer;
 import javax.servlet.ServletException;
-
+import javax.ws.rs.core.MultivaluedMap;
+import com.perfectomobile.perfectomobilejenkins.Constants;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
+import com.sun.jersey.core.util.MultivaluedMapImpl;
 
 public class RestServices {
 	
@@ -27,23 +28,6 @@ public class RestServices {
       }
       return instance;
    }
-	
-	/*public static void main(String[] args) throws IOException, ServletException{
-
-		ClientResponse perfectoResponse = null;
-		
-		//perfectoResponse = RestServices.executeScript("https://www.perfectomobile.com", "jenkins@perfectomobile.com", "Perfecto1", "PRIVATE:variables.xml", null);
-		
-		//perfectoResponse = RestServices.getExecutionStatus("https://www.perfectomobile.com", "jenkins@perfectomobile.com", "Perfecto1", "jenkins@perfectomobile.com_variables_13-12-23_12_59_54_8082");
-		
-		perfectoResponse = RestServices.downloadExecutionReport("https://www.perfectomobile.com", "jenkins@perfectomobile.com", "Perfecto1", "PRIVATE:variables_13-12-23_12_59_54_8082.xml");
-		
-		
-		System.out.println(perfectoResponse.getStatus());
-	    System.out.println(perfectoResponse.getResponseDate());
-	    System.out.println(perfectoResponse.getEntity(String.class));
-		
-	}*/
 	
 	
 	/**
@@ -173,17 +157,19 @@ public class RestServices {
     		final String accessId,
             final String secretKey,
             final String script,
-            final ArrayList optinalParameters) throws IOException, ServletException {
-        
-    	// setup REST-Client
+            final String optinalParameters) throws IOException, ServletException {
+		
+		// setup REST-Client
     	WebResource service = getService(url, accessId, secretKey );
-        ClientResponse perfectoResponse = service.path("services").path("executions").
-    			queryParam("operation", "execute").
-    			queryParam("scriptKey", script).
-    			queryParam("user", accessId).
-    			queryParam("password", secretKey).
-    			//Add here optional values
-    			get(ClientResponse.class);
+    	ClientResponse perfectoResponse = null;
+    	
+    	perfectoResponse = service.path("services").path("executions").
+        			queryParam("operation", "execute").
+        			queryParam("scriptKey", script).
+        			queryParam("user", accessId).
+        			queryParam("password", secretKey).
+        			queryParams(getQueryParamForOptinalParameters(optinalParameters)).
+        			get(ClientResponse.class);
         
         return perfectoResponse;
     }
@@ -261,4 +247,40 @@ public class RestServices {
         
         return perfectoResponse;
     }
+	
+	/**
+	 * This method gets parameters as they appears in Jenkins textarea field and returns 
+	 * Map object that holds parameter name and parameter value.
+	 * Each parameter has a prefix of "param."
+	 * @param optinalParameters
+	 * @return Map object that holds parameter name and parameter value.
+	 * 			For example "param.timeout=10"
+	 */
+	public MultivaluedMap <String, String> getQueryParamForOptinalParameters(String optinalParameters){
+		
+		MultivaluedMap <String, String> scriptParams = new MultivaluedMapImpl ();
+		
+		String paramName;
+		String paramValue;
+		
+		if(!optinalParameters.trim().isEmpty()){
+			//scriptParams = new MultivaluedMapImpl ();
+			
+			//Split to lines
+			StringTokenizer stLines = new StringTokenizer(optinalParameters);
+			while (stLines.hasMoreTokens()) {
+				String paramLine = stLines.nextToken();
+				//Split a line. get the name and the value.
+				StringTokenizer stOneLine = new StringTokenizer(paramLine, "=");	
+				while (stOneLine.hasMoreTokens()) {
+					paramName = Constants.PM_EXEC_PARAMETER_PREFIX + stOneLine.nextToken();
+					paramValue = stOneLine.nextToken();
+					scriptParams.add(paramName, paramValue);
+				}
+			}
+			
+        }
+		
+		return scriptParams;
+	}
 }

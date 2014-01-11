@@ -2,9 +2,11 @@ package com.perfectomobile.perfectomobilejenkins;
 
 import java.io.File;
 import java.io.IOException;
+
 import javax.servlet.ServletException;
+
 import com.perfectomobile.perfectomobilejenkins.connection.rest.RestServices;
-import com.perfectomobile.perfectomobilejenkins.xml.XmlParser;
+import com.perfectomobile.perfectomobilejenkins.parser.xml.XmlParser;
 import com.sun.jersey.api.client.ClientResponse;
 
 /**

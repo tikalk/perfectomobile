@@ -15,13 +15,19 @@
   <f:entry title="Automation Script" field="autoScript">
     <f:textbox />
   </f:entry>
+  <f:validateButton
+	       title="${%Refresh Parameters}" progress="${%Retrieving...}"
+	       method="getParameters" />
+    <f:entry title="Script parameters" field="scriptParams" description="Parameters required by PM script">
+    <f:textarea value="${instance.getParameters()}"/>
+  </f:entry>
   
   <f:advanced>
     <f:entry title="String Type">
       <f:textbox name="stringType"/>
     </f:entry>
     <f:entry title="Number Type">
-      <f:textbox clazz="number" name="numberType" value="${fruit.seeds}"/>
+      <f:textbox clazz="number" name="numberType"/>
     </f:entry>
     <f:entry field="deviceId" title="Device" description="Device ID">
       <f:select />
