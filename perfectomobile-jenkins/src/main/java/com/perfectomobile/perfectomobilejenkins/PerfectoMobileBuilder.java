@@ -12,22 +12,27 @@ import hudson.model.AbstractProject;
 import hudson.tasks.Builder;
 import hudson.tasks.BuildStepDescriptor;
 import net.sf.json.JSONObject;
+
 import org.json.simple.parser.ParseException;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.QueryParameter;
+
 import com.perfectomobile.perfectomobilejenkins.connection.rest.RestServices;
 import com.perfectomobile.perfectomobilejenkins.parser.json.JsonParser;
 import com.perfectomobile.perfectomobilejenkins.parser.xml.XmlParser;
 import com.perfectomobile.perfectomobilejenkins.service.PMExecutionServices;
 import com.sun.jersey.api.client.ClientResponse;
+
 import javax.servlet.ServletException;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 
 /**
  * Sample {@link Builder}.
@@ -140,7 +145,8 @@ public class PerfectoMobileBuilder extends Builder {
 		int jobStatus = PMExecutionServices.JOB_STATUS_RUNNING;
 
 		try {
-
+			RestServices.getInstance().setProxy();
+			 
 			listener.getLogger().println("Calling PM cloud to execute script:");
 
 			perfectoResponse = RestServices.getInstance().executeScript(
@@ -429,7 +435,7 @@ public class PerfectoMobileBuilder extends Builder {
 				e.printStackTrace();
 			}
 
-			if (perfectoResponse.getStatus() == 200) {
+			if (perfectoResponse.getStatus() == Constants.PM_RESPONSE_STATUS_SUCCESS) {
 				return FormValidation
 						.ok("Success. Connection with perfecto mobile verified.");
 			}

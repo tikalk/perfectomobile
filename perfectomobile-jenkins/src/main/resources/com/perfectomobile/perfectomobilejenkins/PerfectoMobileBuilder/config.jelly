@@ -15,12 +15,12 @@
   <f:entry title="Automation Script" field="autoScript">
     <f:textbox />
   </f:entry>
+  <f:entry title="Script parameters" field="scriptParams" description="Parameters required by PM script">
+    <f:textarea value="${instance.getParameters()}"/>
+  </f:entry>
   <f:validateButton
 	       title="${%Refresh Parameters}" progress="${%Retrieving...}"
 	       method="getParameters" />
-    <f:entry title="Script parameters" field="scriptParams" description="Parameters required by PM script">
-    <f:textarea value="${instance.getParameters()}"/>
-  </f:entry>
   
   <f:advanced>
     <f:entry title="String Type">

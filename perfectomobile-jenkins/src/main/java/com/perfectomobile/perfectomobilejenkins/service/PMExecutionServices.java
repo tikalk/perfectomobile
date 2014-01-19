@@ -9,6 +9,7 @@ import org.json.simple.parser.ParseException;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import hudson.EnvVars;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.util.Secret;
@@ -160,20 +161,44 @@ public class PMExecutionServices {
 			e.printStackTrace();
 		}
 
+		//
 		if (perfectoResponse.getStatus() == Constants.PM_RESPONSE_STATUS_SUCCESS) {
 			report = perfectoResponse.getEntity(File.class);
+			
+			EnvVars envVars = new EnvVars();
+			try {
+				envVars = build.getEnvironment(listener);
+				
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			
 			//Put report under specific job
 			String buildPath = System.getProperty("HUDSON_HOME") + 
 					System.getProperty("file.separator") + 
-					build.getUrl() + 
+					"jobs" +
+					System.getProperty("file.separator") + 
+					envVars.get("JOB_NAME") + 
+					System.getProperty("file.separator") + 
+					"builds" + 
+					System.getProperty("file.separator") + 
+					envVars.get("BUILD_NUMBER") + 
+					System.getProperty("file.separator") + 
 					"report.html";
-			System.out.println("buildPath=" + buildPath);
 			
-			if(report.renameTo(new File(buildPath))){
-				listener.getLogger().println("Report is under " + buildPath);
+			//System.out.println("buildPath=" + buildPath);
+			System.out.println("WORKSPACE=" + envVars.get("WORKSPACE"));
+			
+			String reportName = envVars.get("WORKSPACE")+ System.getProperty("file.separator") + reportKey + ".html";
+	        
+			if(report.renameTo(new File(reportName))){
+				listener.getLogger().println("move report into new location success");
 			}else{
-				listener.getLogger().println("Report is under " + report.getAbsolutePath());
+				listener.getLogger().println("move report fail");
 			}
 	 
 		}

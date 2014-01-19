@@ -1,6 +1,9 @@
 package com.perfectomobile.perfectomobilejenkins.connection.rest;
 
+import java.io.File;
+
 import javax.ws.rs.core.MultivaluedMap;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -36,6 +39,14 @@ public class RestServicesTest {
 		MultivaluedMap <String, String> paramMap = RestServices.getInstance().getQueryParamForOptinalParameters(params);
 		
 		System.out.println(paramMap.toString());
+	}
+	
+	@Test
+	public void testFile(){
+		
+		File file = new File("/tmp/readme.txt");
+		file.renameTo(new File ("/tmp/readme2.txt"));
+		System.out.println(file.getAbsolutePath());
 	}
 
 }
