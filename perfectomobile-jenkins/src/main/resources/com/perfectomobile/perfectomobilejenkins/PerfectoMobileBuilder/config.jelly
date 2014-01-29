@@ -4,7 +4,32 @@
 
     See global.jelly for a general discussion about jelly script.
   -->
+<script type="text/javascript">
+         function refreshParameters() {
+                        var form = document.getElementById('refreshParametersHidden').form;
+                        buildFormTree(form);
 
+                        var json = form.elements["json"].value;
+                        var target = document.getElementById("param");
+
+                        target.innerHTML = 'Validating configuration...';
+
+                        new Ajax.Request("../../descriptorByName/com.perfectomobile.perfectomobilejenkins.PerfectoMobileBuilder/getParameters", {
+                                parameters: { json: json },
+                                onComplete: function (rsp) {
+                                        target.innerHTML = rsp.status == 200 ? rsp.responseText
+                                                        : '&lt;a href="" onclick="document.getElementById(\'valerr' +
+                                                        (i = iota++) +
+                                                        '\').style.display=\'block\';return false"&gt;ERROR' +
+                                                        '&lt;/a&gt;' +
+                                                        '&lt;div id="valerr' + i + '" style="display:none"&gt;' +
+                                                        rsp.responseText +
+                                                        '&lt;/div&gt;';
+                                        Behaviour.applySubtree(target);
+                                }
+                        });
+                }
+        </script>      
   <f:entry title="Name" field="name">
     <f:textbox />
   </f:entry>
@@ -15,13 +40,14 @@
   <f:entry title="Automation Script" field="autoScript">
     <f:textbox />
   </f:entry>
-  <f:entry title="Script parameters" field="scriptParams" description="Parameters required by PM script">
-    <f:textarea value="${instance.getParameters()}"/>
+  <f:entry>
+      <div>
+         <input type="button" id="refreshParametersHidden" onClick="refreshParameters()" value="Refresh Parameters" />
+         <f:entry title="Script parameters" field="scriptParams" description="Parameters required by PM script">
+			  <f:textarea value="${instance.getParameters()}" id="param"/>
+	     </f:entry>	
+      </div>
   </f:entry>
-  <f:validateButton
-	       title="${%Refresh Parameters}" progress="${%Retrieving...}"
-	       method="getParameters" />
-  
   <f:advanced>
     <f:entry title="String Type">
       <f:textbox name="stringType"/>

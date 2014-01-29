@@ -1,30 +1,16 @@
 package com.perfectomobile.perfectomobilejenkins;
 
-import hudson.Launcher;
 import hudson.Extension;
+import hudson.Launcher;
+import hudson.model.AutoCompletionCandidates;
+import hudson.model.BuildListener;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.tasks.BuildStepDescriptor;
+import hudson.tasks.Builder;
 import hudson.util.FormValidation;
 import hudson.util.Secret;
 import hudson.util.ListBoxModel;
-import hudson.model.AbstractBuild;
-import hudson.model.AutoCompletionCandidates;
-import hudson.model.BuildListener;
-import hudson.model.AbstractProject;
-import hudson.tasks.Builder;
-import hudson.tasks.BuildStepDescriptor;
-import net.sf.json.JSONObject;
-
-import org.json.simple.parser.ParseException;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.QueryParameter;
-
-import com.perfectomobile.perfectomobilejenkins.connection.rest.RestServices;
-import com.perfectomobile.perfectomobilejenkins.parser.json.JsonParser;
-import com.perfectomobile.perfectomobilejenkins.parser.xml.XmlParser;
-import com.perfectomobile.perfectomobilejenkins.service.PMExecutionServices;
-import com.sun.jersey.api.client.ClientResponse;
-
-import javax.servlet.ServletException;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,6 +18,22 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.servlet.ServletException;
+
+import net.sf.json.JSONObject;
+
+import org.json.simple.parser.ParseException;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerResponse;
+
+import com.perfectomobile.perfectomobilejenkins.connection.rest.RestServices;
+import com.perfectomobile.perfectomobilejenkins.parser.json.JsonParser;
+import com.perfectomobile.perfectomobilejenkins.parser.xml.XmlParser;
+import com.perfectomobile.perfectomobilejenkins.service.PMExecutionServices;
+import com.sun.jersey.api.client.ClientResponse;
 
 
 /**
@@ -88,54 +90,6 @@ public class PerfectoMobileBuilder extends Builder {
 		return scriptParams;
 	}
 
-	public String getParameters() {
-
-		ClientResponse perfectoResponse = null;
-		StringBuffer returnParameters = new StringBuffer();
-
-		if (!scriptParams.trim().isEmpty()) {
-			returnParameters.append(scriptParams);
-		} else if (autoScript != null && autoScript != "") {
-
-			try {
-				perfectoResponse = RestServices
-						.getInstance()
-						.getRepoScriptsItems(
-								getDescriptor().getUrl(),
-								getDescriptor().getAccessId(),
-								Secret.toString(getDescriptor().getSecretKey()),
-								autoScript);
-
-				if (perfectoResponse.getStatus() == Constants.PM_RESPONSE_STATUS_SUCCESS) {
-					File responseXml = perfectoResponse.getEntity(File.class);
-
-					Map <String, String> parametersMap = PMExecutionServices
-							.getScriptParameters(responseXml);
-
-					if (!parametersMap.isEmpty()) {
-						Set parameters = parametersMap.keySet();
-						Iterator iterator = parameters.iterator();
-						while (iterator.hasNext()) {
-							returnParameters
-									.append(iterator.next())
-									.append("=")
-									.append(System
-											.getProperty("line.separator"));
-						}
-					}
-				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ServletException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-
-		return returnParameters.toString();
-	}
-
 	@Override
 	public boolean perform(AbstractBuild build, Launcher launcher,
 			BuildListener listener) {
@@ -152,7 +106,7 @@ public class PerfectoMobileBuilder extends Builder {
 			perfectoResponse = RestServices.getInstance().executeScript(
 					getDescriptor().getUrl(), getDescriptor().getAccessId(),
 					Secret.toString(getDescriptor().getSecretKey()),
-					autoScript, scriptParams);
+					getDescriptor().getAutoScript(), getDescriptor().getScriptParams());
 
 			if (perfectoResponse.getStatus() == Constants.PM_RESPONSE_STATUS_SUCCESS) {
 
@@ -251,6 +205,10 @@ public class PerfectoMobileBuilder extends Builder {
 		private String url;
 		private String username;
 		private Secret password;
+		private String scriptParams;
+		private String autoScript;
+			
+		
 
 		/**
 		 * In order to load the persisted global configuration, you have to call
@@ -258,6 +216,16 @@ public class PerfectoMobileBuilder extends Builder {
 		 */
 		public DescriptorImpl() {
 			load();
+		}
+
+		public String getScriptParams() {
+			// TODO Auto-generated method stub
+			return scriptParams;
+		}
+
+		public String getAutoScript() {
+			// TODO Auto-generated method stub
+			return autoScript;
 		}
 
 		/**
@@ -444,13 +412,59 @@ public class PerfectoMobileBuilder extends Builder {
 							+ perfectoResponse);
 		}
 
-		public FormValidation doGetParameters() throws InterruptedException {
+		public void doGetParameters(StaplerRequest req, StaplerResponse rsp)
+				throws ServletException, IOException {
+            String retVal = null;
+				retVal =getParameters();
+			rsp.getWriter().append(retVal);	
+		}
 
-			// PerfectoMobileBuilder.this.getParameters();
-			Thread.sleep(1500);
+		public String getParameters() {
 
-			return FormValidation.ok();
+			ClientResponse perfectoResponse = null;
+			StringBuffer returnParameters = new StringBuffer();
 
+			if (!scriptParams.trim().isEmpty()) {
+				returnParameters.append(scriptParams);
+			} else if (autoScript != null && autoScript != "") {
+
+				try {
+					perfectoResponse = RestServices
+							.getInstance()
+							.getRepoScriptsItems(
+									getUrl(),
+									getAccessId(),
+									Secret.toString(getSecretKey()),
+									autoScript);
+
+					if (perfectoResponse.getStatus() == Constants.PM_RESPONSE_STATUS_SUCCESS) {
+						File responseXml = perfectoResponse.getEntity(File.class);
+
+						Map <String, String> parametersMap = PMExecutionServices
+								.getScriptParameters(responseXml);
+
+						if (!parametersMap.isEmpty()) {
+							Set parameters = parametersMap.keySet();
+							Iterator iterator = parameters.iterator();
+							while (iterator.hasNext()) {
+								returnParameters
+										.append(iterator.next())
+										.append("=")
+										.append(System
+												.getProperty("line.separator"));
+							}
+						}
+					}
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (ServletException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+
+			return returnParameters.toString();
 		}
 
 	}
