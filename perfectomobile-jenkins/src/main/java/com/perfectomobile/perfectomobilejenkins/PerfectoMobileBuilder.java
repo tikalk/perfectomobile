@@ -17,8 +17,10 @@ import org.json.simple.parser.ParseException;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.jelly.ThisTagLibrary;
 
 import com.perfectomobile.perfectomobilejenkins.connection.rest.RestServices;
+import com.perfectomobile.perfectomobilejenkins.entities.UploadFile;
 import com.perfectomobile.perfectomobilejenkins.parser.json.JsonParser;
 import com.perfectomobile.perfectomobilejenkins.parser.xml.XmlParser;
 import com.perfectomobile.perfectomobilejenkins.service.PMExecutionServices;
@@ -57,16 +59,19 @@ public class PerfectoMobileBuilder extends Builder {
 	private final String perfectoCloud;
 	private final String autoScript;
 	private final String scriptParams;
+	private final List<UploadFile> uploadFiles;
+	
 
 	// Fields in config.jelly must match the parameter names in the
 	// "DataBoundConstructor"
 	@DataBoundConstructor
 	public PerfectoMobileBuilder(String name, String perfectoCloud,
-			String autoScript, String scriptParams) {
+			String autoScript, String scriptParams, List<UploadFile> uploadFiles) {
 		this.name = name;
 		this.perfectoCloud = perfectoCloud;
 		this.autoScript = autoScript;
 		this.scriptParams = scriptParams;
+		this.uploadFiles = uploadFiles;
 	}
 
 	/**
@@ -87,6 +92,10 @@ public class PerfectoMobileBuilder extends Builder {
 	public String getScriptParams() {
 		return scriptParams;
 	}
+	
+	public List<UploadFile> getUploadFiles() {
+		return uploadFiles;
+	}
 
 	public String getParameters() {
 
@@ -98,6 +107,7 @@ public class PerfectoMobileBuilder extends Builder {
 		} else if (autoScript != null && autoScript != "") {
 
 			try {
+				//Call PM
 				perfectoResponse = RestServices
 						.getInstance()
 						.getRepoScriptsItems(
@@ -143,12 +153,18 @@ public class PerfectoMobileBuilder extends Builder {
 		ClientResponse perfectoResponse = null;
 		String jsonExecutionStatusResult = null;
 		int jobStatus = PMExecutionServices.JOB_STATUS_RUNNING;
+		
+		RestServices.getInstance().setLogger(listener.getLogger());
 
 		try {
 			RestServices.getInstance().setProxy();
 			 
+			//Call PM to upload files into repository
+			PMExecutionServices.uploadFiles(getDescriptor(), build, listener, uploadFiles);
+			
 			listener.getLogger().println("Calling PM cloud to execute script:");
 
+			//Call PM to execute the script
 			perfectoResponse = RestServices.getInstance().executeScript(
 					getDescriptor().getUrl(), getDescriptor().getAccessId(),
 					Secret.toString(getDescriptor().getSecretKey()),
@@ -171,6 +187,7 @@ public class PerfectoMobileBuilder extends Builder {
 
 					listener.getLogger().println("Getting execution status:");
 
+					//Call PM to get status
 					perfectoResponse = RestServices.getInstance()
 							.getExecutionStatus(
 									getDescriptor().getUrl(),
@@ -191,6 +208,8 @@ public class PerfectoMobileBuilder extends Builder {
 						}
 					}
 				}
+			}else{
+				listener.getLogger().println("ERROR: " + perfectoResponse.getStatusInfo());
 			}
 
 		} catch (IOException e) {
@@ -207,10 +226,19 @@ public class PerfectoMobileBuilder extends Builder {
 			e.printStackTrace();
 		}
 
-		if (perfectoResponse.getStatus() == Constants.PM_RESPONSE_STATUS_SUCCESS
-				&& jobStatus == PMExecutionServices.JOB_STATUS_SUCCESS) {
+		
+		//Call PM to get report
+		if (jsonExecutionStatusResult != null){
 			PMExecutionServices.getExecutionReport(getDescriptor(), build,
 					listener, jsonExecutionStatusResult);
+		}
+		
+		
+		if (perfectoResponse.getStatus() == Constants.PM_RESPONSE_STATUS_SUCCESS
+				&& jobStatus == PMExecutionServices.JOB_STATUS_SUCCESS) {
+			//Call PM to get report
+			//PMExecutionServices.getExecutionReport(getDescriptor(), build,
+				//	listener, jsonExecutionStatusResult);
 			return true;
 		} else {
 			return false;

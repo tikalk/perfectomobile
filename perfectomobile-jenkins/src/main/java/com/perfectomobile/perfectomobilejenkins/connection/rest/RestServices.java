@@ -2,10 +2,16 @@ package com.perfectomobile.perfectomobilejenkins.connection.rest;
 
 import hudson.ProxyConfiguration;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.StringTokenizer;
 
 import javax.servlet.ServletException;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 
 import org.apache.commons.httpclient.auth.AuthScope;
@@ -27,6 +33,8 @@ import com.sun.jersey.core.util.MultivaluedMapImpl;
 public class RestServices {
 
 	private static RestServices instance = null;
+	private static boolean isDebug = Boolean.valueOf(System.getProperty("pmDebug"));
+	private static PrintStream logger = null;
 
 	protected RestServices() {
 		// Exists only to defeat instantiation.
@@ -39,6 +47,11 @@ public class RestServices {
 		}
 		return instance;
 	}
+	
+	public void setLogger(PrintStream logger){
+		this.logger = logger;
+	}
+	
 
 	/**
 	 * Setup REST Client
@@ -118,7 +131,7 @@ public class RestServices {
 	 * 
 	 * @param url
 	 * @param accessId
-	 * @param secretKey
+	 * @param secretKeyprintRequest
 	 * @param script
 	 * @return
 	 * @throws IOException
@@ -138,10 +151,107 @@ public class RestServices {
 
 		return perfectoResponse;
 	}
+	
+	/**
+	 * Uploads the item specified by repositoryItemKey to the repository area specified by repository. 
+	 * 
+	 * Request/Response Example: 
+	 * 
+	 * -Request:
+	 * https://www.perfectomobile.com/services/repositories/<media or datatables>/<PRIVATE:\myapps\TestApp.apk>?
+	 * operation=upload&user=value&password=value&overwrite=true
+	 * 
+	 * -Response: {"executionId":
+	 * {"status":"success"}
+	 * 
+	 * @see http://help.perfectomobile.com/article/AA-00311/53/Guides-Documentation/HTTP-API/Operations/Repository-Operations/02.-Upload-Item-to-Repository.html
+	 * @param url
+	 * @param accessId
+	 * @param secretKey
+	 * @param repository
+	 * @param repositoryItemKey
+	 * @return
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	public ClientResponse uploadFile(final String url,
+			final String accessId, 
+			final String secretKey, 
+			final String repository,
+			final @PathParam("repositoryItemKey") String repositoryItemKey,
+			final File fileName) throws IOException,
+			ServletException {
+
+		// setup REST-Client
+		WebResource service = getService(url, accessId, secretKey);
+		ClientResponse perfectoResponse = null;
+		
+		
+		service = service
+				.path("services")
+				.path("repositories")
+				.path(repository)
+				.path(repositoryItemKey)
+				.queryParam("operation", "upload")
+				.queryParam("user", accessId)
+				.queryParam("password", secretKey)
+				.queryParam("overwrite", "true");
+			
+		printRequest(service);
+		System.out.println(service.toString());
+		
+		InputStream fileInStream = new FileInputStream(fileName);
+		String contentDisposition = "attachment; filename=\"" + fileName.getName()+"\"";
+		
+		perfectoResponse = service.type(MediaType.MULTIPART_FORM_DATA)
+                .header("Content-Disposition", contentDisposition)
+                .post(ClientResponse.class, fileInStream); 
+		
+		perfectoResponse = service.get(ClientResponse.class);
+		
+		return perfectoResponse;
+	}
+	
+	public ClientResponse uploadFile2(final String url,
+			final String accessId, final String secretKey, final String repository,
+			final String repositoryItemKey) throws IOException,
+			ServletException {
+
+		// setup REST-Client
+		WebResource service = getService(url, accessId, secretKey);
+		ClientResponse perfectoResponse = null;
+		
+		
+		service = service
+				.path("services")
+				.path("repositories")
+				.path(repository)
+				.path(repositoryItemKey)
+				.queryParam("operation", "upload")
+				.queryParam("user", accessId)
+				.queryParam("password", secretKey)
+				.queryParam("overwrite", "true");
+		
+		File fileName = new File("/home/guy/Pictures/Screenshot from 2013-12-21 14:02:41.png");
+			
+		InputStream fileInStream = new FileInputStream(fileName);
+		String sContentDisposition = "attachment; filename=\"" + fileName.getName()+"\"";
+		
+		System.out.println(service);
+		perfectoResponse = service.type(MediaType.APPLICATION_OCTET_STREAM)
+                .header("Content-Disposition", sContentDisposition)
+                .post(ClientResponse.class, fileInStream); 
+		System.out.println("after upload");
+		return perfectoResponse;
+	}
 
 	/**
 	 * Starts a new asynchronous execution of the specified script and returns
-	 * immediately with the response data. Request/Response Example: -Request:
+	 * immediately with the response data. 
+	 * 
+	 * Request/Response Example: 
+	 * 
+	 * -Request:
 	 * https://mycloud.perfectomobile.com/services/executions?
 	 * operation=execute&
 	 * scriptKey=value&user=value&password=value[&optionalParameter=value]
@@ -180,7 +290,8 @@ public class RestServices {
 				.queryParams(
 						getQueryParamForOptinalParameters(optinalParameters));
 			
-		System.out.println(service.toString());
+		printRequest(service);
+	
 		perfectoResponse = service.get(ClientResponse.class);
 		
 		return perfectoResponse;
@@ -188,7 +299,10 @@ public class RestServices {
 
 	/**
 	 * Gets the status of the running or recently completed execution
-	 * Request/Response Example: -Request:
+	 * 
+	 * Request/Response Example: 
+	 * 
+	 * -Request:
 	 * https://mycloud.perfectomobile.com/services/executions/<executionId>?
 	 * operation=status&user=value&password=value
 	 * 
@@ -230,7 +344,9 @@ public class RestServices {
 
 	/**
 	 * Gets the status of the running or recently completed execution
-	 * Request/Response Example: -Request:
+	 * Request/Response Example: 
+	 * 
+	 * -Request:
 	 * https://mycloud.perfectomobile.com/services/reports/<reportKey>?
 	 * operation=download&user=value&password=value
 	 * 
@@ -354,5 +470,11 @@ public class RestServices {
 			client = Client.create(config);
 		}
 		return client;
+	}
+	
+	private void printRequest(WebResource service){
+		if (isDebug){
+			logger.println(service.toString());
+		}
 	}
 }

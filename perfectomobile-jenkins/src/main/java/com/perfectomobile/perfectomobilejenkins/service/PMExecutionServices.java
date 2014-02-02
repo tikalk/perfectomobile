@@ -3,17 +3,24 @@ package com.perfectomobile.perfectomobilejenkins.service;
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+
 import javax.servlet.ServletException;
+
 import org.json.simple.parser.ParseException;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
 import hudson.EnvVars;
+import hudson.console.HyperlinkNote;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.util.Secret;
+
 import com.perfectomobile.perfectomobilejenkins.connection.rest.RestServices;
+import com.perfectomobile.perfectomobilejenkins.entities.UploadFile;
 import com.perfectomobile.perfectomobilejenkins.parser.json.JsonParser;
 import com.perfectomobile.perfectomobilejenkins.parser.xml.XmlParser;
 import com.perfectomobile.perfectomobilejenkins.Constants;
@@ -190,11 +197,14 @@ public class PMExecutionServices {
 					System.getProperty("file.separator") + 
 					"report.html";
 			
-			//System.out.println("buildPath=" + buildPath);
-			System.out.println("WORKSPACE=" + envVars.get("WORKSPACE"));
+			
 			
 			String reportName = envVars.get("WORKSPACE")+ System.getProperty("file.separator") + reportKey + ".html";
-	        
+			
+			
+			listener.getLogger().println(HyperlinkNote.encodeTo("http://localhost:8080/jenkins/job/" + envVars.get("JOB_NAME") + "/ws/" + reportKey + ".html", "Show report"));
+			//listener.getLogger().println("http://localhost:8080/jenkins/job/test1/ws/PRIVATE%3AalwaysPass120Seconds_14-01-13_05_39_02_31362.xml.html");
+		
 			if(report.renameTo(new File(reportName))){
 				listener.getLogger().println("move report into new location success");
 			}else{
@@ -205,5 +215,55 @@ public class PMExecutionServices {
 
 		return report;
 
+	}
+	
+	/**
+	 * Call PM to upload files to the repository.
+	 * @param descriptor
+	 * @param build
+	 * @param listener
+	 * @param uploadFiles files to upload
+	 * @return the execution report
+	 */
+	public static void uploadFiles(DescriptorImpl descriptor,
+			AbstractBuild build, BuildListener listener,
+			List<UploadFile> uploadFiles) {
+
+		
+		ClientResponse perfectoResponse = null;
+		
+		if (uploadFiles !=null){
+			
+			for (UploadFile uploadFile : uploadFiles) {
+				
+				try {
+					//Print upload details
+					listener.getLogger().println("Calling PM cloud to upload files into repository:");
+					listener.getLogger().println("Repository = " + uploadFile.getRepository());
+					listener.getLogger().println("Repository Item Key = " + uploadFile.getRepositoryItemKey());
+					listener.getLogger().println("File path = " + uploadFile.getFilePath());
+					
+					//Call PM to upload the files
+					perfectoResponse = RestServices.getInstance().uploadFile(
+							descriptor.getUrl(),
+							descriptor.getAccessId(),
+							Secret.toString(descriptor.getSecretKey()),
+							"media", 
+							uploadFile.getRepositoryItemKey(),
+							new File(uploadFile.getFilePath()));
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (ServletException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+        }
+			
+			
+			
+			
+		}
+		
 	}
 }

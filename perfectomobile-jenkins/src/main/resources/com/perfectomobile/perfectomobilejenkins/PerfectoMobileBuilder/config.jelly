@@ -22,7 +22,38 @@
 	       title="${%Refresh Parameters}" progress="${%Retrieving...}"
 	       method="getParameters" />
   
+ 
+     <f:entry title="File to upload" field="uploadFiles">
+                    <f:repeatable field="uploadFiles" noAddButton="false" add="Add parameter"  minimum="0">
+                            <table width="100%">
+                            <!--f:entry name="repository" title="Repository" field="repository">
+							    <select name="repository">
+							        <option value="media">media</option>
+							        <option value="datatables">datatables</option>
+							    </select>
+							</f:entry-->
+							<f:entry title="Repository" field="repository">
+                                      <f:textbox />
+                            </f:entry>
+                            <f:entry title="File path" field="filePath">
+                                      <f:textbox />
+                            </f:entry>
+                    		<f:entry title="Repository key" field="repositoryItemKey">
+                                      <f:textbox />
+                            </f:entry>
+                                
+                        
+                           <f:entry>
+                        	<f:repeatableDeleteButton />
+                		   </f:entry>
+                         
+                        </table>
+                    </f:repeatable>
+                  </f:entry>
+
+
   <f:advanced>
+  
     <f:entry title="String Type">
       <f:textbox name="stringType"/>
     </f:entry>
