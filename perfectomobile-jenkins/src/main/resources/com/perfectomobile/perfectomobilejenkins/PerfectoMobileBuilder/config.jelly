@@ -26,7 +26,7 @@
      <f:entry title="File to upload" field="uploadFiles">
                     <f:repeatable field="uploadFiles" noAddButton="false" add="Add parameter"  minimum="0">
                             <table width="100%">
-                            <!--f:entry name="repository" title="Repository" field="repository">
+                            <!-- Doesn't show the value after refresh although it is saved. f:entry name="repository" title="Repository" field="repository">
 							    <select name="repository">
 							        <option value="media">media</option>
 							        <option value="datatables">datatables</option>

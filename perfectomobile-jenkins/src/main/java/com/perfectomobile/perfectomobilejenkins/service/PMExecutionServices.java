@@ -2,12 +2,14 @@ package com.perfectomobile.perfectomobilejenkins.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
 
+import org.apache.http.HttpResponse;
 import org.json.simple.parser.ParseException;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -19,6 +21,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.util.Secret;
 
+import com.perfectomobile.perfectomobilejenkins.connection.http.HttpServices;
 import com.perfectomobile.perfectomobilejenkins.connection.rest.RestServices;
 import com.perfectomobile.perfectomobilejenkins.entities.UploadFile;
 import com.perfectomobile.perfectomobilejenkins.parser.json.JsonParser;
@@ -29,8 +32,9 @@ import com.sun.jersey.api.client.ClientResponse;
 
 /**
  * PM services during the execution of the script.
+ * 
  * @author Guy Michaelis
- *
+ * 
  */
 public class PMExecutionServices {
 
@@ -39,7 +43,9 @@ public class PMExecutionServices {
 	public static final int JOB_STATUS_SUCCESS = 3;
 
 	/**
-	 * Get job status according to manipulation on PM get execution status response.
+	 * Get job status according to manipulation on PM get execution status
+	 * response.
+	 * 
 	 * @param perfectoResponse
 	 * @param listener
 	 * @return
@@ -82,10 +88,11 @@ public class PMExecutionServices {
 
 	/**
 	 * Get script parameters from the file returned by PM cloud
+	 * 
 	 * @param inputFile
 	 * @return Map of parameter name and parameter type.
 	 */
-	public static Map <String, String> getScriptParameters(File inputFile) {
+	public static Map<String, String> getScriptParameters(File inputFile) {
 
 		Map<String, String> scriptParams = new LinkedHashMap<String, String>();
 
@@ -95,7 +102,8 @@ public class PMExecutionServices {
 		NodeList nodeList = XmlParser.getInstance().getNodeList(inputFile,
 				XmlParser.PARAMETER_ELEMENT_NAME);
 
-		System.out.println("===============================================================");
+		System.out
+				.println("===============================================================");
 
 		// do this the old way, because nodeList is not iterable
 		for (int itr = 0; itr < nodeList.getLength(); itr++) {
@@ -128,10 +136,12 @@ public class PMExecutionServices {
 
 	/**
 	 * Call PM to retrieve the execution report.
+	 * 
 	 * @param descriptor
 	 * @param build
 	 * @param listener
-	 * @param jsonExecutionResult PM response in json format
+	 * @param jsonExecutionResult
+	 *            PM response in json format
 	 * @return the execution report
 	 */
 	public static File getExecutionReport(DescriptorImpl descriptor,
@@ -171,11 +181,11 @@ public class PMExecutionServices {
 		//
 		if (perfectoResponse.getStatus() == Constants.PM_RESPONSE_STATUS_SUCCESS) {
 			report = perfectoResponse.getEntity(File.class);
-			
+
 			EnvVars envVars = new EnvVars();
 			try {
 				envVars = build.getEnvironment(listener);
-				
+
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -183,87 +193,87 @@ public class PMExecutionServices {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
-			//Put report under specific job
-			String buildPath = System.getProperty("HUDSON_HOME") + 
-					System.getProperty("file.separator") + 
-					"jobs" +
-					System.getProperty("file.separator") + 
-					envVars.get("JOB_NAME") + 
-					System.getProperty("file.separator") + 
-					"builds" + 
-					System.getProperty("file.separator") + 
-					envVars.get("BUILD_NUMBER") + 
-					System.getProperty("file.separator") + 
-					"report.html";
-			
-			
-			
-			String reportName = envVars.get("WORKSPACE")+ System.getProperty("file.separator") + reportKey + ".html";
-			
-			
-			listener.getLogger().println(HyperlinkNote.encodeTo("http://localhost:8080/jenkins/job/" + envVars.get("JOB_NAME") + "/ws/" + reportKey + ".html", "Show report"));
-			//listener.getLogger().println("http://localhost:8080/jenkins/job/test1/ws/PRIVATE%3AalwaysPass120Seconds_14-01-13_05_39_02_31362.xml.html");
-		
-			if(report.renameTo(new File(reportName))){
-				listener.getLogger().println("move report into new location success");
-			}else{
+
+			// Put report under specific job
+			String buildPath = System.getProperty("HUDSON_HOME")
+					+ System.getProperty("file.separator") + "jobs"
+					+ System.getProperty("file.separator")
+					+ envVars.get("JOB_NAME")
+					+ System.getProperty("file.separator") + "builds"
+					+ System.getProperty("file.separator")
+					+ envVars.get("BUILD_NUMBER")
+					+ System.getProperty("file.separator") + "report.html";
+
+			String reportName = envVars.get("WORKSPACE")
+					+ System.getProperty("file.separator") + reportKey
+					+ ".html";
+
+			listener.getLogger().println(
+					HyperlinkNote.encodeTo("http://localhost:8080/jenkins/job/"
+							+ envVars.get("JOB_NAME") + "/ws/" + reportKey
+							+ ".html", "Show report"));
+			// listener.getLogger().println("http://localhost:8080/jenkins/job/test1/ws/PRIVATE%3AalwaysPass120Seconds_14-01-13_05_39_02_31362.xml.html");
+
+			if (report.renameTo(new File(reportName))) {
+				listener.getLogger().println(
+						"move report into new location success");
+			} else {
 				listener.getLogger().println("move report fail");
 			}
-	 
+
 		}
 
 		return report;
 
 	}
-	
+
 	/**
 	 * Call PM to upload files to the repository.
+	 * 
 	 * @param descriptor
 	 * @param build
 	 * @param listener
-	 * @param uploadFiles files to upload
+	 * @param uploadFiles
+	 *            files to upload
 	 * @return the execution report
 	 */
 	public static void uploadFiles(DescriptorImpl descriptor,
 			AbstractBuild build, BuildListener listener,
 			List<UploadFile> uploadFiles) {
 
-		
-		ClientResponse perfectoResponse = null;
-		
-		if (uploadFiles !=null){
-			
+		HttpResponse perfectoResponse = null;
+
+		if (uploadFiles != null) {
+
 			for (UploadFile uploadFile : uploadFiles) {
-				
+
 				try {
-					//Print upload details
-					listener.getLogger().println("Calling PM cloud to upload files into repository:");
-					listener.getLogger().println("Repository = " + uploadFile.getRepository());
-					listener.getLogger().println("Repository Item Key = " + uploadFile.getRepositoryItemKey());
-					listener.getLogger().println("File path = " + uploadFile.getFilePath());
-					
-					//Call PM to upload the files
-					perfectoResponse = RestServices.getInstance().uploadFile(
-							descriptor.getUrl(),
-							descriptor.getAccessId(),
+					// Print upload details
+					listener.getLogger()
+							.println(
+									"Calling PM cloud to upload files into repository:");
+					listener.getLogger().println(
+							"Repository = " + uploadFile.getRepository());
+					listener.getLogger().println(
+							"Repository Item Key = "
+									+ uploadFile.getRepositoryItemKey());
+					listener.getLogger().println(
+							"File path = " + uploadFile.getFilePath());
+
+					// Call PM to upload the files
+					HttpServices.getInstance().setLogger(listener.getLogger());
+					perfectoResponse = HttpServices.getInstance().uploadFile(
+							descriptor.getUrl(), descriptor.getAccessId(),
 							Secret.toString(descriptor.getSecretKey()),
-							"media", 
+							uploadFile.getRepository(),
 							uploadFile.getRepositoryItemKey(),
 							new File(uploadFile.getFilePath()));
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (ServletException e) {
+				} catch (URISyntaxException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-        }
-			
-			
-			
-			
+			}
 		}
-		
+
 	}
 }
