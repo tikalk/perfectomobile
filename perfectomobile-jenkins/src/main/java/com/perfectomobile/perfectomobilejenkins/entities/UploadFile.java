@@ -1,12 +1,14 @@
 package com.perfectomobile.perfectomobilejenkins.entities;
 
+import hudson.Extension;
+import hudson.model.AbstractDescribableImpl;
 import hudson.model.Describable;
 import hudson.model.Descriptor;
 import hudson.model.Hudson;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 
-public class UploadFile implements Describable<UploadFile> {
+public final class UploadFile extends AbstractDescribableImpl <UploadFile> {
 	private String repository;
 	private String filePath;
 	private String repositoryItemKey;
@@ -42,10 +44,13 @@ public class UploadFile implements Describable<UploadFile> {
 		this.repository = repository;
 	}
 
-	public Descriptor<UploadFile> getDescriptor() {
-		 return Hudson.getInstance().getDescriptorOrDie(getClass());
-	}
 	
+	@Extension
+	 public static class DescriptorImpl extends Descriptor<UploadFile> {
+		
+			@Override
+	        public String getDisplayName() { return ""; }
+	  }
 	
 
 }
