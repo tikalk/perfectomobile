@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import javax.servlet.ServletException;
@@ -415,11 +416,14 @@ public class PerfectoMobileBuilder extends Builder {
 		public void doGetParameters(StaplerRequest req, StaplerResponse rsp)
 				throws ServletException, IOException {
             String retVal = null;
-				retVal =getParameters();
+            JSONObject json = req.getSubmittedForm();
+            JSONObject builder = (JSONObject) json.get("builder");
+            String autoScriptJson =  builder.getString("autoScript");
+			retVal =getParameters(autoScriptJson.toString());
 			rsp.getWriter().append(retVal);	
 		}
 
-		public String getParameters() {
+		public String getParameters(String autoScript) {
 
 			ClientResponse perfectoResponse = null;
 			StringBuffer returnParameters = new StringBuffer();
