@@ -24,7 +24,7 @@
   
  
      <f:entry title="File to upload" field="uploadFiles">
-                    <f:repeatable field="uploadFiles" noAddButton="false" add="Add parameter"  minimum="0">
+                    <f:repeatable field="uploadFiles" noAddButton="false" add="Add file"  minimum="0">
                             <table width="100%">
                             <!-- Doesn't show the value after refresh although it is saved. f:entry name="repository" title="Repository" field="repository">
 							    <select name="repository">
@@ -56,12 +56,14 @@
   
     <f:entry title="String Type">
       <f:textbox name="stringType"/>
+      
     </f:entry>
     <f:entry title="Number Type">
       <f:textbox clazz="number" name="numberType"/>
     </f:entry>
     <f:entry field="deviceId" title="Device" description="Device ID">
       <f:select />
+      <l:copyButton  message="text copied" text="${instance.deviceId}" container="DIV"/>
     </f:entry>
   </f:advanced>
  
