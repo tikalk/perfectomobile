@@ -22,6 +22,8 @@ import java.util.Set;
 
 import javax.servlet.ServletException;
 
+import net.sf.json.JSON;
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import org.json.simple.parser.ParseException;
@@ -415,9 +417,28 @@ public class PerfectoMobileBuilder extends Builder {
 
 		public void doGetParameters(StaplerRequest req, StaplerResponse rsp)
 				throws ServletException, IOException {
+			String targetClass = null; //Must understand where it is comes from.
             String retVal = null;
             JSONObject json = req.getSubmittedForm();
-            JSONObject builder = (JSONObject) json.get("builder");
+            //JSONObject builder = (JSONObject) json.get("builder");
+            //String autoScriptJson =  builder.getString("autoScript");
+			//retVal =getParameters(autoScriptJson.toString());
+			//rsp.getWriter().append(retVal);	
+            JSONObject builder = null;
+            JSON jsonB = (JSON) json.get("builder");
+            if(jsonB.isArray()) {
+                JSONArray arr = (JSONArray) jsonB;
+                for(Object i : arr) {
+                    JSONObject ji = (JSONObject) i;
+                    if(targetClass.equals(ji.get("stapler-class"))) {
+                    	builder = ji;
+                    }
+                }
+            } else {
+            	builder = (JSONObject) jsonB;
+            	
+            }
+            
             String autoScriptJson =  builder.getString("autoScript");
 			retVal =getParameters(autoScriptJson.toString());
 			rsp.getWriter().append(retVal);	
