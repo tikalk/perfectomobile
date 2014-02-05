@@ -428,9 +428,9 @@ public class PerfectoMobileBuilder extends Builder {
 			ClientResponse perfectoResponse = null;
 			StringBuffer returnParameters = new StringBuffer();
 
-			if (!scriptParams.trim().isEmpty()) {
-				returnParameters.append(scriptParams);
-			} else if (autoScript != null && autoScript != "") {
+			//if (!scriptParams.trim().isEmpty()) {
+			//	returnParameters.append(scriptParams);
+			//} else if (autoScript != null && autoScript != "") {
 
 				try {
 					perfectoResponse = RestServices
@@ -466,7 +466,7 @@ public class PerfectoMobileBuilder extends Builder {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-			}
+			//}
 
 			return returnParameters.toString();
 		}
