@@ -168,14 +168,14 @@ public class PMExecutionServices {
 							Secret.toString(descriptor.getSecretKey()),
 							reportKey);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			listener.getLogger().println(e.toString());
+			return null;
 		} catch (ServletException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			listener.getLogger().println(e.toString());
+			return null;
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			listener.getLogger().println(e.toString());
+			return null;
 		}
 
 		//
@@ -185,13 +185,12 @@ public class PMExecutionServices {
 			EnvVars envVars = new EnvVars();
 			try {
 				envVars = build.getEnvironment(listener);
-
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				listener.getLogger().println(e.toString());
+				return null;
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				listener.getLogger().println(e.toString());
+				return null;
 			}
 
 			// Put report under specific job
@@ -212,8 +211,7 @@ public class PMExecutionServices {
 					HyperlinkNote.encodeTo("http://localhost:8080/jenkins/job/"
 							+ envVars.get("JOB_NAME") + "/ws/" + reportKey
 							+ ".html", "Show report"));
-			// listener.getLogger().println("http://localhost:8080/jenkins/job/test1/ws/PRIVATE%3AalwaysPass120Seconds_14-01-13_05_39_02_31362.xml.html");
-
+			
 			if (report.renameTo(new File(reportName))) {
 				listener.getLogger().println(
 						"move report into new location success");
@@ -221,6 +219,8 @@ public class PMExecutionServices {
 				listener.getLogger().println("move report fail");
 			}
 
+		}else{
+			listener.getLogger().println("WARNING: Can't show report. PM returned status " + perfectoResponse.getStatus());
 		}
 
 		return report;
