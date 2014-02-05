@@ -2,6 +2,7 @@ package com.perfectomobile.perfectomobilejenkins.connection.rest;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.text.ParseException;
 
@@ -27,6 +28,9 @@ public class UploadFileServiceTest {
 					"PRIVATE:/pictures/pic12.png",
 					fileName);
 		} catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

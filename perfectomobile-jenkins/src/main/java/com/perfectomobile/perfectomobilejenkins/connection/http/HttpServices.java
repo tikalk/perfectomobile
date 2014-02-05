@@ -15,18 +15,28 @@ import javax.ws.rs.PathParam;
 
 import jenkins.model.Jenkins;
 
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClients;
 
 public class HttpServices {
 	
 	private static HttpServices instance = null;
 	private static boolean isDebug = Boolean.valueOf(System.getProperty("pmDebug"));
 	private static PrintStream logger = null;
+	private static ProxyConfiguration proxy;
 
 	protected HttpServices() {
 		setProxy();
@@ -57,9 +67,10 @@ public class HttpServices {
 
 		if (Jenkins.getInstance() != null) {
 
-			ProxyConfiguration proxy = Jenkins.getInstance().proxy;
+			proxy = Jenkins.getInstance().proxy;
 
 			if (proxy != null) {
+				System.out.println("HTTPClient setProxy");
 				System.out.println("proxy details:");
 				System.out.println(proxy.getUserName());
 				System.out.println(proxy.getPassword());
@@ -68,6 +79,22 @@ public class HttpServices {
 			} else {
 				System.out.println("No proxy available");
 			}
+		}
+	}
+	
+	/**
+	 * Set proxy on the client if available
+	 */
+	private void setProxyDetails(HttpPost httpPost) {
+
+		if (proxy != null) {
+			
+			HttpHost httpHost = new HttpHost(proxy.name, proxy.port);
+			RequestConfig config = RequestConfig.custom()
+		                .setProxy(httpHost)
+		                .build();
+				
+			httpPost.setConfig(config);
 		}
 	}
 	
@@ -99,7 +126,7 @@ public class HttpServices {
 			final String secretKey, 
 			final String repository,
 			final @PathParam("repositoryItemKey") String repositoryItemKey,
-			final File fileName) throws URISyntaxException {
+			final File fileName) throws URISyntaxException, IOException {
 		
 		
 		String path = "/services/repositories/" + repository + "/" + repositoryItemKey; 
@@ -120,17 +147,28 @@ public class HttpServices {
 	 * @param uri
 	 * @param file
 	 * @return
+	 * @throws IOException 
 	 */
-	private HttpResponse sendRequest(URI uri, File file){
+	private HttpResponse sendRequest(URI uri, File file) throws IOException{
 		
-		HttpClient httpClient = new DefaultHttpClient();
+		//HttpClient httpClient = new DefaultHttpClient();
+		CredentialsProvider credsProvider = new BasicCredentialsProvider();
+        credsProvider.setCredentials(
+                new AuthScope("localhost", 8080),
+                new UsernamePasswordCredentials("username", "password"));
+        CloseableHttpClient httpClient = HttpClients.custom()
+                .setDefaultCredentialsProvider(credsProvider).build();
 
 	    HttpPost httpPost = new HttpPost(uri);
+	    
+	    setProxyDetails(httpPost);
 
 	    InputStreamEntity reqEntity = null;
+	    
 		try {
 			reqEntity = new InputStreamEntity(
 			        new FileInputStream(file), -1);
+			
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -139,6 +177,7 @@ public class HttpServices {
 	    reqEntity.setChunked(true); // Send in multiple parts if needed
 	    httpPost.setEntity(reqEntity);
 	    HttpResponse response = null;
+	    
 	    try {
 			response = httpClient.execute(httpPost);
 		} catch (ClientProtocolException e) {
@@ -147,7 +186,9 @@ public class HttpServices {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		} finally {
+            httpClient.close();
+        }
 	    
 	    return response;
 	}

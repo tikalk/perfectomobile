@@ -1,32 +1,16 @@
 package com.perfectomobile.perfectomobilejenkins;
 
-import hudson.Launcher;
 import hudson.Extension;
+import hudson.Launcher;
+import hudson.model.AutoCompletionCandidates;
+import hudson.model.BuildListener;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.tasks.BuildStepDescriptor;
+import hudson.tasks.Builder;
 import hudson.util.FormValidation;
 import hudson.util.Secret;
 import hudson.util.ListBoxModel;
-import hudson.model.AbstractBuild;
-import hudson.model.AutoCompletionCandidates;
-import hudson.model.BuildListener;
-import hudson.model.AbstractProject;
-import hudson.tasks.Builder;
-import hudson.tasks.BuildStepDescriptor;
-import net.sf.json.JSONObject;
-
-import org.json.simple.parser.ParseException;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.jelly.ThisTagLibrary;
-
-import com.perfectomobile.perfectomobilejenkins.connection.rest.RestServices;
-import com.perfectomobile.perfectomobilejenkins.entities.UploadFile;
-import com.perfectomobile.perfectomobilejenkins.parser.json.JsonParser;
-import com.perfectomobile.perfectomobilejenkins.parser.xml.XmlParser;
-import com.perfectomobile.perfectomobilejenkins.service.PMExecutionServices;
-import com.sun.jersey.api.client.ClientResponse;
-
-import javax.servlet.ServletException;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,6 +18,22 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.servlet.ServletException;
+
+import net.sf.json.JSONObject;
+
+import org.json.simple.parser.ParseException;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.StaplerRequest;
+
+import com.perfectomobile.perfectomobilejenkins.connection.rest.RestServices;
+import com.perfectomobile.perfectomobilejenkins.entities.UploadFile;
+import com.perfectomobile.perfectomobilejenkins.parser.json.JsonParser;
+import com.perfectomobile.perfectomobilejenkins.parser.xml.XmlParser;
+import com.perfectomobile.perfectomobilejenkins.service.PMExecutionServices;
+import com.sun.jersey.api.client.ClientResponse;
 
 
 /**
