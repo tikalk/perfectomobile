@@ -32,9 +32,12 @@
 							        <option value="datatables">datatables</option>
 							    </select>
 							</f:entry-->
-							<f:entry title="Repository" field="repository">
+							<!--f:entry title="Repository" field="repository">
                                       <f:textbox />
-                            </f:entry>
+                            </f:entry-->
+                            <f:entry title="Repository" field="repository">
+						      <f:select />
+						    </f:entry>
                             <f:entry title="File path" field="filePath">
                                       <f:textbox />
                             </f:entry>
@@ -63,7 +66,7 @@
     </f:entry>
     <f:entry field="deviceId" title="Device" description="Device ID">
       <f:select />
-      <l:copyButton  message="text copied" text="${instance.deviceId}" container="DIV"/>
+      <!--l:copyButton  message="text copied" text="${instance.deviceId}" container="DIV"/-->
     </f:entry>
   </f:advanced>
  

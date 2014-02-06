@@ -36,10 +36,8 @@ public class HttpServices {
 	private static HttpServices instance = null;
 	private static boolean isDebug = Boolean.valueOf(System.getProperty("pmDebug"));
 	private static PrintStream logger = null;
-	private static ProxyConfiguration proxy;
 
 	protected HttpServices() {
-		setProxy();
 	}
 
 	public static HttpServices getInstance() {
@@ -60,35 +58,15 @@ public class HttpServices {
 		}
 	}
 	
-	/**
-	 * Set proxy if available
-	 */
-	private void setProxy() {
-
-		if (Jenkins.getInstance() != null) {
-
-			proxy = Jenkins.getInstance().proxy;
-
-			if (proxy != null) {
-				System.out.println("HTTPClient setProxy");
-				System.out.println("proxy details:");
-				System.out.println(proxy.getUserName());
-				System.out.println(proxy.getPassword());
-				System.out.println(proxy.name);
-				System.out.println(proxy.port);
-			} else {
-				System.out.println("No proxy available");
-			}
-		}
-	}
 	
 	/**
 	 * Set proxy on the client if available
 	 */
-	private void setProxyDetails(HttpPost httpPost) {
+	private void setProxy(HttpPost httpPost) {
 
+		ProxyConfiguration proxy = Jenkins.getInstance().proxy;
+		
 		if (proxy != null) {
-			
 			HttpHost httpHost = new HttpHost(proxy.name, proxy.port);
 			RequestConfig config = RequestConfig.custom()
 		                .setProxy(httpHost)
@@ -151,7 +129,6 @@ public class HttpServices {
 	 */
 	private HttpResponse sendRequest(URI uri, File file) throws IOException{
 		
-		//HttpClient httpClient = new DefaultHttpClient();
 		CredentialsProvider credsProvider = new BasicCredentialsProvider();
         credsProvider.setCredentials(
                 new AuthScope("localhost", 8080),
@@ -161,7 +138,7 @@ public class HttpServices {
 
 	    HttpPost httpPost = new HttpPost(uri);
 	    
-	    setProxyDetails(httpPost);
+	    setProxy(httpPost);
 
 	    InputStreamEntity reqEntity = null;
 	    

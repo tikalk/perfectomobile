@@ -5,6 +5,7 @@ import hudson.model.AbstractDescribableImpl;
 import hudson.model.Describable;
 import hudson.model.Descriptor;
 import hudson.model.Hudson;
+import hudson.util.ListBoxModel;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -50,6 +51,15 @@ public final class UploadFile extends AbstractDescribableImpl <UploadFile> {
 		
 			@Override
 	        public String getDisplayName() { return ""; }
+			
+			public ListBoxModel doFillRepositoryItems() {
+				ListBoxModel items = new ListBoxModel();
+				
+				items.add("media");
+				items.add("datatables");
+				
+				return items;
+			}
 	  }
 	
 

@@ -193,24 +193,13 @@ public class PMExecutionServices {
 				return null;
 			}
 
-			// Put report under specific job
-			String buildPath = System.getProperty("HUDSON_HOME")
-					+ System.getProperty("file.separator") + "jobs"
-					+ System.getProperty("file.separator")
-					+ envVars.get("JOB_NAME")
-					+ System.getProperty("file.separator") + "builds"
-					+ System.getProperty("file.separator")
-					+ envVars.get("BUILD_NUMBER")
-					+ System.getProperty("file.separator") + "report.html";
-
 			String reportName = envVars.get("WORKSPACE")
 					+ System.getProperty("file.separator") + reportKey
 					+ ".html";
 
 			listener.getLogger().println(
-					HyperlinkNote.encodeTo("http://localhost:8080/jenkins/job/"
-							+ envVars.get("JOB_NAME") + "/ws/" + reportKey
-							+ ".html", "Show report"));
+					HyperlinkNote.encodeTo(envVars.get("JOB_URL") + "/ws/" + 
+							reportKey + ".html", "Show report"));
 			
 			if (report.renameTo(new File(reportName))) {
 				listener.getLogger().println(

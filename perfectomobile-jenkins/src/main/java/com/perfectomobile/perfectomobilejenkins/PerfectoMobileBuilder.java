@@ -456,20 +456,18 @@ public class PerfectoMobileBuilder extends Builder {
 				perfectoResponse = RestServices.getInstance().getHandsets(url,
 						accessId, secretKey);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				return FormValidation.error(e.getMessage());
 			} catch (ServletException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				return FormValidation.error(e.getMessage());
 			}
 
 			if (perfectoResponse.getStatus() == Constants.PM_RESPONSE_STATUS_SUCCESS) {
 				return FormValidation
 						.ok("Success. Connection with perfecto mobile verified.");
 			}
+			
 			return FormValidation
-					.error("Failed. Please check the configuration. HTTP Status: "
-							+ perfectoResponse);
+					.error("Credentials refused, please check that your username and password are correct. HTTP Error " + perfectoResponse.getStatus());
 		}
 
 		public FormValidation doGetParameters() throws InterruptedException {
