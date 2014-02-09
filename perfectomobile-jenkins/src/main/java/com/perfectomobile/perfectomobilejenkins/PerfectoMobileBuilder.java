@@ -21,12 +21,30 @@ import java.util.Set;
 
 import javax.servlet.ServletException;
 
+import hudson.util.FormValidation;
+import hudson.util.Secret;
+import hudson.util.ListBoxModel;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+
+import javax.servlet.ServletException;
+
+import net.sf.json.JSON;
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import org.json.simple.parser.ParseException;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
+
+import org.kohsuke.stapler.StaplerResponse;
 
 import com.perfectomobile.perfectomobilejenkins.connection.rest.RestServices;
 import com.perfectomobile.perfectomobilejenkins.entities.UploadFile;
@@ -470,13 +488,81 @@ public class PerfectoMobileBuilder extends Builder {
 					.error("Credentials refused, please check that your username and password are correct. HTTP Error " + perfectoResponse.getStatus());
 		}
 
-		public FormValidation doGetParameters() throws InterruptedException {
+		public void doGetParameters(StaplerRequest req, StaplerResponse rsp)
+				throws ServletException, IOException {
+			String targetClass = null; //Must understand where it is comes from.
+            String retVal = null;
+            JSONObject json = req.getSubmittedForm();
+            //JSONObject builder = (JSONObject) json.get("builder");
+            //String autoScriptJson =  builder.getString("autoScript");
+			//retVal =getParameters(autoScriptJson.toString());
+			//rsp.getWriter().append(retVal);	
+            JSONObject builder = null;
+            JSON jsonB = (JSON) json.get("builder");
+            if(jsonB.isArray()) {
+                JSONArray arr = (JSONArray) jsonB;
+                for(Object i : arr) {
+                    JSONObject ji = (JSONObject) i;
+                    if(targetClass.equals(ji.get("stapler-class"))) {
+                    	builder = ji;
+                    }
+                }
+            } else {
+            	builder = (JSONObject) jsonB;
+            	
+            }
+            
+            String autoScriptJson =  builder.getString("autoScript");
+			retVal =getParameters(autoScriptJson.toString());
+			rsp.getWriter().append(retVal);	
+		}
 
-			// PerfectoMobileBuilder.this.getParameters();
-			Thread.sleep(1500);
+		public String getParameters(String autoScript) {
 
-			return FormValidation.ok();
+			ClientResponse perfectoResponse = null;
+			StringBuffer returnParameters = new StringBuffer();
 
+			//if (!scriptParams.trim().isEmpty()) {
+			//	returnParameters.append(scriptParams);
+			//} else if (autoScript != null && autoScript != "") {
+
+				try {
+					perfectoResponse = RestServices
+							.getInstance()
+							.getRepoScriptsItems(
+									getUrl(),
+									getAccessId(),
+									Secret.toString(getSecretKey()),
+									autoScript);
+
+					if (perfectoResponse.getStatus() == Constants.PM_RESPONSE_STATUS_SUCCESS) {
+						File responseXml = perfectoResponse.getEntity(File.class);
+
+						Map <String, String> parametersMap = PMExecutionServices
+								.getScriptParameters(responseXml);
+
+						if (!parametersMap.isEmpty()) {
+							Set parameters = parametersMap.keySet();
+							Iterator iterator = parameters.iterator();
+							while (iterator.hasNext()) {
+								returnParameters
+										.append(iterator.next())
+										.append("=")
+										.append(System
+												.getProperty("line.separator"));
+							}
+						}
+					}
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (ServletException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			//}
+
+			return returnParameters.toString();
 		}
 
 	}
