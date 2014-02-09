@@ -9,6 +9,7 @@ import java.util.Map;
 
 import javax.servlet.ServletException;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpResponse;
 import org.json.simple.parser.ParseException;
 import org.w3c.dom.Element;
@@ -201,12 +202,13 @@ public class PMExecutionServices {
 					HyperlinkNote.encodeTo(envVars.get("JOB_URL") + "/ws/" + 
 							reportKey + ".html", "Show report"));
 			
-			if (report.renameTo(new File(reportName))) {
-				listener.getLogger().println(
-						"move report into new location success");
-			} else {
-				listener.getLogger().println("move report fail");
+			try {
+				FileUtils.moveFile(report, new File(reportName));
+			} catch (IOException e) {
+				listener.getLogger().println(e.toString());
+				return null;
 			}
+
 
 		}else{
 			listener.getLogger().println("WARNING: Can't show report. PM returned status " + perfectoResponse.getStatus());
