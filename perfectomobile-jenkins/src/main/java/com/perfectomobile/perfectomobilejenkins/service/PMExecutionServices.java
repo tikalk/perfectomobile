@@ -166,7 +166,7 @@ public class PMExecutionServices {
 			perfectoResponse = RestServices.getInstance()
 					.downloadExecutionReport(descriptor.getUrl(),
 							descriptor.getAccessId(),
-							Secret.toString(descriptor.getSecretKey()),
+							descriptor.getSecretKey(),
 							reportKey);
 		} catch (IOException e) {
 			listener.getLogger().println(e.toString());
@@ -255,7 +255,7 @@ public class PMExecutionServices {
 					HttpServices.getInstance().setLogger(listener.getLogger());
 					perfectoResponse = HttpServices.getInstance().uploadFile(
 							descriptor.getUrl(), descriptor.getAccessId(),
-							Secret.toString(descriptor.getSecretKey()),
+							descriptor.getSecretKey(),
 							uploadFile.getRepository(),
 							uploadFile.getRepositoryItemKey(),
 							new File(uploadFile.getFilePath()));

@@ -131,7 +131,7 @@ public class PerfectoMobileBuilder extends Builder {
 						.getRepoScriptsItems(
 								getDescriptor().getUrl(),
 								getDescriptor().getAccessId(),
-								Secret.toString(getDescriptor().getSecretKey()),
+								getDescriptor().getSecretKey(),
 								autoScript);
 
 				if (perfectoResponse.getStatus() == Constants.PM_RESPONSE_STATUS_SUCCESS) {
@@ -185,7 +185,7 @@ public class PerfectoMobileBuilder extends Builder {
 			//Call PM to execute the script
 			perfectoResponse = RestServices.getInstance().executeScript(
 					getDescriptor().getUrl(), getDescriptor().getAccessId(),
-					Secret.toString(getDescriptor().getSecretKey()),
+					getDescriptor().getSecretKey(),
 					autoScript, scriptParams);
 
 			if (perfectoResponse.getStatus() == Constants.PM_RESPONSE_STATUS_SUCCESS) {
@@ -210,8 +210,8 @@ public class PerfectoMobileBuilder extends Builder {
 							.getExecutionStatus(
 									getDescriptor().getUrl(),
 									getDescriptor().getAccessId(),
-									Secret.toString(getDescriptor()
-											.getSecretKey()), executionId);
+									getDescriptor()
+											.getSecretKey(), executionId);
 					if (perfectoResponse.getStatus() == Constants.PM_RESPONSE_STATUS_SUCCESS) {
 						jsonExecutionStatusResult = perfectoResponse
 								.getEntity(String.class);
@@ -296,7 +296,7 @@ public class PerfectoMobileBuilder extends Builder {
 		private String logicalName;
 		private String url;
 		private String username;
-		private Secret password;
+		private String password;
 
 		/**
 		 * In order to load the persisted global configuration, you have to call
@@ -342,7 +342,7 @@ public class PerfectoMobileBuilder extends Builder {
 			try {
 				perfectoResponse = RestServices.getInstance().getHandsets(
 						getUrl(), getAccessId(),
-						Secret.toString(getSecretKey()));
+						getSecretKey());
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -379,7 +379,7 @@ public class PerfectoMobileBuilder extends Builder {
 
 			// Holds all Perfecto scripts
 			String[] scripts = PMScripts.getInstance().getAllScripts(url,
-					username, Secret.toString(password));
+					username, password);
 
 			for (String script : scripts)
 				if (script.toLowerCase().startsWith(value.toLowerCase()))
@@ -408,7 +408,7 @@ public class PerfectoMobileBuilder extends Builder {
 			logicalName = formData.getString("logicalName");
 			url = formData.getString("url");
 			username = formData.getString("accessId");
-			password = Secret.fromString(formData.getString("secretKey"));
+			password = formData.getString("secretKey");
 			// ^Can also use req.bindJSON(this, formData);
 			// (easier when there are many fields; need set* methods for this,
 			// like setUrl)
@@ -433,7 +433,7 @@ public class PerfectoMobileBuilder extends Builder {
 			return username;
 		}
 
-		public Secret getSecretKey() {
+		public String getSecretKey() {
 			return password;
 		}
 
@@ -532,7 +532,7 @@ public class PerfectoMobileBuilder extends Builder {
 							.getRepoScriptsItems(
 									getUrl(),
 									getAccessId(),
-									Secret.toString(getSecretKey()),
+									getSecretKey(),
 									autoScript);
 
 					if (perfectoResponse.getStatus() == Constants.PM_RESPONSE_STATUS_SUCCESS) {
