@@ -316,10 +316,6 @@ public class PerfectoMobileBuilder extends Builder {
 		 */
 		public FormValidation doCheckName(@QueryParameter String value)
 				throws IOException, ServletException {
-			if (value.length() == 0)
-				return FormValidation.error("Please set a name");
-			if (value.length() < 4)
-				return FormValidation.warning("Isn't the name too short?");
 			return FormValidation.ok();
 		}
 
