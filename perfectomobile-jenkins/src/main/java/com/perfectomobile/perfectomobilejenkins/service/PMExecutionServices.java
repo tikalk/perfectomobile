@@ -182,7 +182,7 @@ public class PMExecutionServices {
 		//
 		if (perfectoResponse.getStatus() == Constants.PM_RESPONSE_STATUS_SUCCESS) {
 			report = perfectoResponse.getEntity(File.class);
-
+			
 			EnvVars envVars = new EnvVars();
 			try {
 				envVars = build.getEnvironment(listener);
@@ -193,11 +193,16 @@ public class PMExecutionServices {
 				listener.getLogger().println(e.toString());
 				return null;
 			}
-
+			
+			
+			//replace colon with underscore because it is forbiden in windows
+			reportKey = reportKey.replace(":", "_");
+			
+			
 			String reportName = envVars.get("WORKSPACE")
 					+ System.getProperty("file.separator") + reportKey
 					+ ".html";
-
+			
 			listener.getLogger().println(
 					HyperlinkNote.encodeTo(envVars.get("JOB_URL") + "/ws/" + 
 							reportKey + ".html", "Show report"));
