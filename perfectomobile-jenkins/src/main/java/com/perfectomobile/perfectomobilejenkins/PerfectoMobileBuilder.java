@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
@@ -43,7 +44,6 @@ import org.json.simple.parser.ParseException;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
-
 import org.kohsuke.stapler.StaplerResponse;
 
 import com.perfectomobile.perfectomobilejenkins.connection.rest.RestServices;
@@ -115,7 +115,7 @@ public class PerfectoMobileBuilder extends Builder {
 		return uploadFiles;
 	}
 
-	public String getParameters() {
+	/*public String getParameters() {
 
 		ClientResponse perfectoResponse = null;
 		StringBuffer returnParameters = new StringBuffer();
@@ -162,7 +162,7 @@ public class PerfectoMobileBuilder extends Builder {
 		}
 
 		return returnParameters.toString();
-	}
+	}*/
 
 	@Override
 	public boolean perform(AbstractBuild build, Launcher launcher,
@@ -489,10 +489,7 @@ public class PerfectoMobileBuilder extends Builder {
 			String targetClass = null; //Must understand where it is comes from.
             String retVal = null;
             JSONObject json = req.getSubmittedForm();
-            //JSONObject builder = (JSONObject) json.get("builder");
-            //String autoScriptJson =  builder.getString("autoScript");
-			//retVal =getParameters(autoScriptJson.toString());
-			//rsp.getWriter().append(retVal);	
+            
             JSONObject builder = null;
             JSON jsonB = (JSON) json.get("builder");
             if(jsonB.isArray()) {
@@ -518,10 +515,7 @@ public class PerfectoMobileBuilder extends Builder {
 			ClientResponse perfectoResponse = null;
 			StringBuffer returnParameters = new StringBuffer();
 
-			//if (!scriptParams.trim().isEmpty()) {
-			//	returnParameters.append(scriptParams);
-			//} else if (autoScript != null && autoScript != "") {
-
+			
 				try {
 					perfectoResponse = RestServices
 							.getInstance()
@@ -538,11 +532,16 @@ public class PerfectoMobileBuilder extends Builder {
 								.getScriptParameters(responseXml);
 
 						if (!parametersMap.isEmpty()) {
-							Set parameters = parametersMap.keySet();
-							Iterator iterator = parameters.iterator();
+							//Set parameters = parametersMap.keySet();
+							Set<Entry<String, String>> parameters = parametersMap.entrySet();
+							Iterator<Entry<String, String>> iterator = parameters.iterator();
 							while (iterator.hasNext()) {
+								Entry<String, String> nextParam = iterator.next();
 								returnParameters
-										.append(iterator.next())
+										.append(nextParam.getKey())
+										.append("(")
+										.append(nextParam.getValue())
+										.append(")")
 										.append("=")
 										.append(System
 												.getProperty("line.separator"));
@@ -556,7 +555,6 @@ public class PerfectoMobileBuilder extends Builder {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-			//}
 
 			return returnParameters.toString();
 		}

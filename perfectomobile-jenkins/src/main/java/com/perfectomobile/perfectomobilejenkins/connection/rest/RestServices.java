@@ -304,8 +304,12 @@ public class RestServices {
 				// Split a line. get the name and the value.
 				StringTokenizer stOneLine = new StringTokenizer(paramLine, "=");
 				while (stOneLine.hasMoreTokens()) {
+					String paramWithType = stOneLine.nextToken();
+					System.out.println("paramWithType=" + paramWithType);
+					StringTokenizer stParamWithType = new StringTokenizer(paramWithType, "(");
+					System.out.println("stParamWithType=" + stParamWithType);
 					paramName = Constants.PM_EXEC_PARAMETER_PREFIX
-							+ stOneLine.nextToken();
+							+ stParamWithType.nextToken();
 					paramValue = stOneLine.nextToken();
 					scriptParams.add(paramName, paramValue);
 				}
@@ -315,6 +319,7 @@ public class RestServices {
 
 		return scriptParams;
 	}
+	
 
 	/**
 	 * Set proxy if available
