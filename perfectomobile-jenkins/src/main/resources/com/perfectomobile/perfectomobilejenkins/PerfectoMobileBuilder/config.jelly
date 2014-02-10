@@ -17,6 +17,7 @@
                         new Ajax.Request("../../descriptorByName/com.perfectomobile.perfectomobilejenkins.PerfectoMobileBuilder/getParameters", {
                                 parameters: { json: json },
                                 onComplete: function (rsp) {
+                                //alert(target.value);
                                         target.innerHTML = rsp.status == 200 ? rsp.responseText
                                                         : '&lt;a href="" onclick="document.getElementById(\'valerr' +
                                                         (i = iota++) +
@@ -30,11 +31,11 @@
                         });
                 }
         </script>      
-  <f:entry title="Name" field="name">
+  <f:entry title="Build Name" field="name">
     <f:textbox />
   </f:entry>
   
-  <f:entry field="perfectoCloud" title="Choose Perfecto Cloud">
+  <f:entry field="perfectoCloud" title="Perfecto MobileCloud">
    <f:select />
   </f:entry>
   <f:entry title="Automation Script" field="autoScript">
@@ -43,8 +44,8 @@
   <f:entry>
       <div>
          <input type="button" id="refreshParametersHidden" onClick="refreshParameters()" value="Refresh Parameters" />
-         <f:entry title="Script parameters" field="scriptParams" description="Parameters required by PM script">
-			  <f:textarea value="${instance.getParameters()}" id="param"/>
+         <f:entry title="Script Parameters" field="scriptParams" description="Parameters required by PM script">
+			  <f:textarea id="param"/>
 	     </f:entry>	
       </div>
   </f:entry>
@@ -72,10 +73,10 @@
                   </f:entry>
 
 
-  <f:advanced title="Device selector">
+  <f:advanced title="Device List" >
     <f:entry field="deviceId" title="Device" description="Device ID">
       <f:select />
-      <!--l:copyButton  message="text copied" text="${instance.deviceId}" container="DIV"/-->
+      <!--l:copyButton  message="text copied" text="${deviceId}" container="DIV"/-->
     </f:entry>
   </f:advanced>
  

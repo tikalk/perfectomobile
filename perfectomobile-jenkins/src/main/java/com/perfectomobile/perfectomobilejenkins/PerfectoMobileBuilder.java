@@ -486,7 +486,7 @@ public class PerfectoMobileBuilder extends Builder {
 
 		public void doGetParameters(StaplerRequest req, StaplerResponse rsp)
 				throws ServletException, IOException {
-			String targetClass = null; //Must understand where it is comes from.
+			String targetClass = getId();
             String retVal = null;
             JSONObject json = req.getSubmittedForm();
             
@@ -507,6 +507,9 @@ public class PerfectoMobileBuilder extends Builder {
             
             String autoScriptJson =  builder.getString("autoScript");
 			retVal =getParameters(autoScriptJson.toString());
+			
+			System.out.println("List of parameters return:" + retVal);
+			
 			rsp.getWriter().append(retVal);	
 		}
 

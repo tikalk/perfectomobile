@@ -3,7 +3,7 @@ package com.perfectomobile.perfectomobilejenkins;
 public class Constants {
 	
 	
-	public static final int EXEC_STATUS_WAIT_TIME_IN_SECONDS=5;
+	public static final int EXEC_STATUS_WAIT_TIME_IN_SECONDS=10;
 	public static final int PM_RESPONSE_STATUS_SUCCESS=200;
 	
 	public static final String PM_EXEC_STATUS_COMPLETED="Completed";
