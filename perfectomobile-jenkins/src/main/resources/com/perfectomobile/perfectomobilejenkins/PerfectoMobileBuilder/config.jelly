@@ -72,12 +72,11 @@
                     </f:repeatable>
                   </f:entry>
 
-
-  <f:advanced title="Device List" >
+  <f:advanced title="Device List" align="left" >
     <f:entry field="deviceId" title="Device" description="Device ID">
       <f:select />
       <!--l:copyButton  message="text copied" text="${deviceId}" container="DIV"/-->
     </f:entry>
   </f:advanced>
- 
+
 </j:jelly>
