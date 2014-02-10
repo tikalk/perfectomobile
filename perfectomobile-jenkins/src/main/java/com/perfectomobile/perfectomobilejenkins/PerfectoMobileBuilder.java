@@ -542,10 +542,10 @@ public class PerfectoMobileBuilder extends Builder {
 								Entry<String, String> nextParam = iterator.next();
 								returnParameters
 										.append(nextParam.getKey())
-										.append("(")
+										.append(Constants.PARAM_TYPE_START_TAG)
 										.append(nextParam.getValue())
-										.append(")")
-										.append("=")
+										.append(Constants.PARAM_TYPE_END_TAG)
+										.append(Constants.PARAM_NAME_VALUE_SEPARATOR)
 										.append(System
 												.getProperty("line.separator"));
 							}

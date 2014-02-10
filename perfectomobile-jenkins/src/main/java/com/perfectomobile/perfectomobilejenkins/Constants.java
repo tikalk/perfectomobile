@@ -17,4 +17,8 @@ public class Constants {
 	
 	public static final String PM_EXEC_PARAMETER_PREFIX = "param.";
 	
+	public static final String PARAM_TYPE_START_TAG = "(";
+	public static final String PARAM_TYPE_END_TAG = ")";
+	public static final String PARAM_NAME_VALUE_SEPARATOR = "=";
+	
 }

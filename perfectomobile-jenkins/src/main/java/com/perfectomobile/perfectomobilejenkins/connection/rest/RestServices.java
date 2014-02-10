@@ -302,11 +302,11 @@ public class RestServices {
 				String paramLine = stLines.nextToken();
 				System.out.println("paramLine=" + paramLine);
 				// Split a line. get the name and the value.
-				StringTokenizer stOneLine = new StringTokenizer(paramLine, "=");
+				StringTokenizer stOneLine = new StringTokenizer(paramLine, Constants.PARAM_NAME_VALUE_SEPARATOR);
 				while (stOneLine.hasMoreTokens()) {
 					String paramWithType = stOneLine.nextToken();
 					System.out.println("paramWithType=" + paramWithType);
-					StringTokenizer stParamWithType = new StringTokenizer(paramWithType, "(");
+					StringTokenizer stParamWithType = new StringTokenizer(paramWithType, Constants.PARAM_TYPE_START_TAG);
 					System.out.println("stParamWithType=" + stParamWithType);
 					paramName = Constants.PM_EXEC_PARAMETER_PREFIX
 							+ stParamWithType.nextToken();
