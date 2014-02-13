@@ -5,20 +5,20 @@
     See global.jelly for a general discussion about jelly script.
   -->
 <script type="text/javascript">
-         function refreshParameters() {
+         function refreshParameters(id) {
                         var form = document.getElementById('refreshParametersHidden').form;
                         buildFormTree(form);
 
                         var json = form.elements["json"].value;
-                        var target = document.getElementById("param");
+                        var target = id;
 
-                        target.innerHTML = 'Validating configuration...';
+                        target.value = 'Validating configuration...';
 
                         new Ajax.Request("../../descriptorByName/com.perfectomobile.perfectomobilejenkins.PerfectoMobileBuilder/getParameters", {
-                                parameters: { json: json },
+                                parameters: { json: json, id: id.id },
                                 onComplete: function (rsp) {
                                 //alert(target.value);
-                                        target.innerHTML = rsp.status == 200 ? rsp.responseText
+                                        target.value = rsp.status == 200 ? rsp.responseText
                                                         : '&lt;a href="" onclick="document.getElementById(\'valerr' +
                                                         (i = iota++) +
                                                         '\').style.display=\'block\';return false"&gt;ERROR' +
@@ -43,9 +43,11 @@
   </f:entry>
   <f:entry>
       <div>
-         <input type="button" id="refreshParametersHidden" onClick="refreshParameters()" value="Refresh Parameters" />
+      	<j:set var="id" value="${descriptor.getRandomID()}" />
+      	<input type="hidden" name="id" value="${id}" />
+         <input type="button" id="refreshParametersHidden" onClick="refreshParameters(param${id})" value="Refresh Parameters" />
          <f:entry title="Script Parameters" field="scriptParams" description="Parameters required by PM script">
-			  <f:textarea id="param"/>
+			  <f:textarea id="param${id}"/>
 	     </f:entry>	
       </div>
   </f:entry>

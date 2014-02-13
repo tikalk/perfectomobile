@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Random;
 import java.util.Set;
 
 import javax.servlet.ServletException;
@@ -78,18 +79,21 @@ public class PerfectoMobileBuilder extends Builder {
 	private final String autoScript;
 	private final String scriptParams;
 	private final List<UploadFile> uploadFiles;
+	private final String id;
 	
 
 	// Fields in config.jelly must match the parameter names in the
 	// "DataBoundConstructor"
 	@DataBoundConstructor
 	public PerfectoMobileBuilder(String name, String perfectoCloud,
-			String autoScript, String scriptParams, List<UploadFile> uploadFiles) {
+			String autoScript, String scriptParams, 
+			List<UploadFile> uploadFiles, String id) {
 		this.name = name;
 		this.perfectoCloud = perfectoCloud;
 		this.autoScript = autoScript;
 		this.scriptParams = scriptParams;
 		this.uploadFiles = uploadFiles;
+		this.id=id;
 	}
 
 	/**
@@ -97,6 +101,10 @@ public class PerfectoMobileBuilder extends Builder {
 	 */
 	public String getName() {
 		return name;
+	}
+	
+	public String getId() {
+		return id;
 	}
 
 	public String getPerfectoCloud() {
@@ -489,6 +497,7 @@ public class PerfectoMobileBuilder extends Builder {
 			String targetClass = getId();
             String retVal = null;
             JSONObject json = req.getSubmittedForm();
+            String id = (((String[]) req.getParameterMap().get("id"))[0]).substring(5); //get id parameter and remove the "param" prefix
             
             JSONObject builder = null;
             JSON jsonB = (JSON) json.get("builder");
@@ -497,7 +506,11 @@ public class PerfectoMobileBuilder extends Builder {
                 for(Object i : arr) {
                     JSONObject ji = (JSONObject) i;
                     if(targetClass.equals(ji.get("stapler-class"))) {
-                    	builder = ji;
+                    	PerfectoMobileBuilder pbBuilder = req.bindJSON(PerfectoMobileBuilder.class, ji);
+                    	if(pbBuilder.getId().equals(id)){
+                    		builder = ji;
+                    	}
+                    	
                     }
                 }
             } else {
@@ -561,6 +574,11 @@ public class PerfectoMobileBuilder extends Builder {
 
 			return returnParameters.toString();
 		}
+		
+		public int getRandomID() {
+        
+            return Math.abs(new Random().nextInt());
+        }
 
 	}
 }
