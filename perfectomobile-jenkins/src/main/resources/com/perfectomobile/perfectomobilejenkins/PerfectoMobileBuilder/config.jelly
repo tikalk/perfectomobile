@@ -12,12 +12,12 @@
                         var json = form.elements["json"].value;
                         var target = id;
 
-                        target.value = 'Validating configuration...';
+                       target.value = 'Getting parameters...';
 
                         new Ajax.Request("../../descriptorByName/com.perfectomobile.perfectomobilejenkins.PerfectoMobileBuilder/getParameters", {
                                 parameters: { json: json, id: id.id },
                                 onComplete: function (rsp) {
-                                //alert(target.value);
+
                                         target.value = rsp.status == 200 ? rsp.responseText
                                                         : '&lt;a href="" onclick="document.getElementById(\'valerr' +
                                                         (i = iota++) +
@@ -35,7 +35,7 @@
     <f:textbox />
   </f:entry>
   
-  <f:entry field="perfectoCloud" title="Perfecto MobileCloud">
+  <f:entry field="perfectoCloud" title="MobileCloud">
    <f:select />
   </f:entry>
   <f:entry title="Automation Script" field="autoScript">
@@ -45,7 +45,7 @@
       <div>
       	<j:set var="id" value="${descriptor.getRandomID()}" />
       	<input type="hidden" name="id" value="${id}" />
-         <input type="button" id="refreshParametersHidden" onClick="refreshParameters(param${id})" value="Refresh Parameters" />
+         <input type="button" id="refreshParametersHidden" onClick="refreshParameters(param${id})" value="Parameters List" />
          <f:entry title="Script Parameters" field="scriptParams" description="Parameters required by PM script">
 			  <f:textarea id="param${id}"/>
 	     </f:entry>	
