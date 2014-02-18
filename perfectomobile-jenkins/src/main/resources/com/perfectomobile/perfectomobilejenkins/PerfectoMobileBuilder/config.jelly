@@ -51,28 +51,6 @@
 	     </f:entry>	
       </div>
   </f:entry>
-  
- 
-     <f:entry title="File to upload" field="uploadFiles">
-                    <f:repeatable field="uploadFiles" noAddButton="false" add="Add file"  minimum="0">
-                            <table width="100%">
-                            <f:entry title="Repository key" field="repositoryItemKey">
-                              <f:textbox />
-                            </f:entry>    
-                            <f:entry title="Repository" field="repository">
-						      <f:select />
-						    </f:entry>
-                            <f:entry title="File path" field="filePath">
-                              <f:textbox />
-                            </f:entry>
-           
-                           <f:entry>
-                        	<f:repeatableDeleteButton />
-                		   </f:entry>
-                         
-                        </table>
-                    </f:repeatable>
-                  </f:entry>
 
   <f:advanced title="Device List" align="left" >
     <f:entry field="deviceId" title="Device" description="Device ID">

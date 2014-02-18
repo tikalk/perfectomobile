@@ -1,18 +1,13 @@
 package com.perfectomobile.perfectomobilejenkins.connection.rest;
 
 import hudson.ProxyConfiguration;
-
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.StringTokenizer;
-
 import javax.servlet.ServletException;
 import javax.ws.rs.core.MultivaluedMap;
-
 import jenkins.model.Jenkins;
-
 import org.apache.commons.httpclient.auth.AuthScope;
-
 import com.perfectomobile.perfectomobilejenkins.Constants;
 import com.perfectomobile.perfectomobilejenkins.connection.Proxy;
 import com.sun.jersey.api.client.Client;
@@ -293,28 +288,31 @@ public class RestServices {
 
 		String paramName;
 		String paramValue;
+		String parameType;
 
 		if (!optinalParameters.trim().isEmpty()) {
 			// Split to lines
-			StringTokenizer stLines = new StringTokenizer(optinalParameters, System.getProperty("line.separator"));
-			System.out.println(stLines.toString());
-			while (stLines.hasMoreTokens()) {
-				String paramLine = stLines.nextToken();
-				System.out.println("paramLine=" + paramLine);
+			StringTokenizer stParameters = new StringTokenizer(optinalParameters, System.getProperty("line.separator"));
+			while (stParameters.hasMoreTokens()) {
+				String parameter = stParameters.nextToken();
 				// Split a line. get the name and the value.
-				StringTokenizer stOneLine = new StringTokenizer(paramLine, Constants.PARAM_NAME_VALUE_SEPARATOR);
-				while (stOneLine.hasMoreTokens()) {
-					String paramWithType = stOneLine.nextToken();
-					System.out.println("paramWithType=" + paramWithType);
+				StringTokenizer stParamToken = new StringTokenizer(parameter, Constants.PARAM_NAME_VALUE_SEPARATOR);
+				while (stParamToken.hasMoreTokens()) {
+					String paramWithType = stParamToken.nextToken();
 					StringTokenizer stParamWithType = new StringTokenizer(paramWithType, Constants.PARAM_TYPE_START_TAG);
-					System.out.println("stParamWithType=" + stParamWithType);
 					paramName = Constants.PM_EXEC_PARAMETER_PREFIX
 							+ stParamWithType.nextToken();
-					paramValue = stOneLine.nextToken();
+					String parameTypeWithEndTag = stParamWithType.nextToken();
+					parameType = parameTypeWithEndTag.substring(0, parameTypeWithEndTag.length()- Constants.PARAM_TYPE_END_TAG.length());
+					paramValue = stParamToken.nextToken();
+					//In case it is a file. need to separate the repositorykey from the filepath.
+					if (parameType.equals(Constants.PARAM_TYPE_MEDIA) || parameType.equals(Constants.PARAM_TYPE_DATATABLES)){
+						paramValue = paramValue.substring(0, paramValue.indexOf(Constants.PARAM_REPOSITORYKEY_FILEPATH_SEPARATOR));
+					}
+
 					scriptParams.add(paramName, paramValue);
 				}
 			}
-
 		}
 
 		return scriptParams;

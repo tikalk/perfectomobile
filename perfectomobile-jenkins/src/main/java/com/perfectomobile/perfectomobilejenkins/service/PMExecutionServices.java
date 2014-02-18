@@ -3,9 +3,11 @@ package com.perfectomobile.perfectomobilejenkins.service;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 import javax.servlet.ServletException;
 
@@ -235,11 +237,46 @@ public class PMExecutionServices {
 	 */
 	public static void uploadFiles(DescriptorImpl descriptor,
 			AbstractBuild build, BuildListener listener,
-			List<UploadFile> uploadFiles) {
+			String textAreaParameters) {
 
 		HttpResponse perfectoResponse = null;
+		List<UploadFile> uploadFiles = new ArrayList<UploadFile>();
 
-		if (uploadFiles != null) {
+		
+		String paramName;
+		String paramValue;
+		String parameTypeWithEndTag;
+		String parameType;
+		String repositoryKey;
+		String filePath;
+
+		if (!textAreaParameters.trim().isEmpty()) {
+			// Split to lines
+			StringTokenizer stParameters = new StringTokenizer(textAreaParameters, System.getProperty("line.separator"));
+			while (stParameters.hasMoreTokens()) {
+				String parameter = stParameters.nextToken();
+				// Split a line. get the name and the value.
+				StringTokenizer stParamToken = new StringTokenizer(parameter, Constants.PARAM_NAME_VALUE_SEPARATOR);
+				while (stParamToken.hasMoreTokens()) {
+					String paramWithType = stParamToken.nextToken();
+					StringTokenizer stParamWithType = new StringTokenizer(paramWithType, Constants.PARAM_TYPE_START_TAG);
+					paramName = stParamWithType.nextToken();
+					parameTypeWithEndTag = stParamWithType.nextToken();
+					parameType = parameTypeWithEndTag.substring(0, parameTypeWithEndTag.length()- Constants.PARAM_TYPE_END_TAG.length());
+					paramValue = stParamToken.nextToken();
+					if (parameType.equals(Constants.PARAM_TYPE_MEDIA) || parameType.equals(Constants.PARAM_TYPE_DATATABLES)){
+						StringTokenizer stParamValue = new StringTokenizer(paramValue, Constants.PARAM_REPOSITORYKEY_FILEPATH_SEPARATOR);
+						repositoryKey = stParamValue.nextToken();
+						filePath = stParamValue.nextToken();
+						UploadFile uploadFile = new UploadFile(parameType, filePath, repositoryKey);
+						uploadFiles.add(uploadFile);
+					}
+				}
+			}
+
+		}
+
+		if (uploadFiles.size() > 0) {
 
 			for (UploadFile uploadFile : uploadFiles) {
 

@@ -9,20 +9,6 @@ import hudson.model.AbstractProject;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
-import hudson.util.Secret;
-import hudson.util.ListBoxModel;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.servlet.ServletException;
-
-import hudson.util.FormValidation;
-import hudson.util.Secret;
 import hudson.util.ListBoxModel;
 
 import java.io.File;
@@ -31,7 +17,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Properties;
 import java.util.Random;
 import java.util.Set;
 
@@ -48,7 +33,6 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
 import com.perfectomobile.perfectomobilejenkins.connection.rest.RestServices;
-import com.perfectomobile.perfectomobilejenkins.entities.UploadFile;
 import com.perfectomobile.perfectomobilejenkins.parser.json.JsonParser;
 import com.perfectomobile.perfectomobilejenkins.parser.xml.XmlParser;
 import com.perfectomobile.perfectomobilejenkins.service.PMExecutionServices;
@@ -78,7 +62,6 @@ public class PerfectoMobileBuilder extends Builder {
 	private final String perfectoCloud;
 	private final String autoScript;
 	private final String scriptParams;
-	private final List<UploadFile> uploadFiles;
 	private final String id;
 	
 
@@ -86,13 +69,11 @@ public class PerfectoMobileBuilder extends Builder {
 	// "DataBoundConstructor"
 	@DataBoundConstructor
 	public PerfectoMobileBuilder(String name, String perfectoCloud,
-			String autoScript, String scriptParams, 
-			List<UploadFile> uploadFiles, String id) {
+			String autoScript, String scriptParams, String id) {
 		this.name = name;
 		this.perfectoCloud = perfectoCloud;
 		this.autoScript = autoScript;
 		this.scriptParams = scriptParams;
-		this.uploadFiles = uploadFiles;
 		this.id=id;
 	}
 
@@ -119,9 +100,6 @@ public class PerfectoMobileBuilder extends Builder {
 		return scriptParams;
 	}
 	
-	public List<UploadFile> getUploadFiles() {
-		return uploadFiles;
-	}
 
 	/*public String getParameters() {
 
@@ -183,10 +161,11 @@ public class PerfectoMobileBuilder extends Builder {
 		RestServices.getInstance().setLogger(listener.getLogger());
 
 		try {
+			//Set proxy if exists
 			RestServices.getInstance().setProxy();
 			 
 			//Call PM to upload files into repository
-			PMExecutionServices.uploadFiles(getDescriptor(), build, listener, uploadFiles);
+			PMExecutionServices.uploadFiles(getDescriptor(), build, listener, scriptParams);
 			
 			listener.getLogger().println("Calling PM cloud to execute script:");
 
@@ -556,7 +535,7 @@ public class PerfectoMobileBuilder extends Builder {
 								returnParameters
 										.append(nextParam.getKey())
 										.append(Constants.PARAM_TYPE_START_TAG)
-										.append(nextParam.getValue())
+										.append(nextParam.getValue().substring(0, nextParam.getValue().length()-Constants.PARAM_TYPE_DATA_LENGTH))
 										.append(Constants.PARAM_TYPE_END_TAG)
 										.append(Constants.PARAM_NAME_VALUE_SEPARATOR)
 										.append(System

@@ -1,20 +1,10 @@
 package com.perfectomobile.perfectomobilejenkins.entities;
 
-import hudson.Extension;
-import hudson.model.AbstractDescribableImpl;
-import hudson.model.Describable;
-import hudson.model.Descriptor;
-import hudson.model.Hudson;
-import hudson.util.ListBoxModel;
-
-import org.kohsuke.stapler.DataBoundConstructor;
-
-public final class UploadFile extends AbstractDescribableImpl <UploadFile> {
+public final class UploadFile {
 	private String repository;
 	private String filePath;
 	private String repositoryItemKey;
-	
-	@DataBoundConstructor
+
 	public UploadFile (String repository, String filePath, String repositoryItemKey){
 		this.setRepository(repository);
 		this.setFilePath(filePath);
@@ -44,23 +34,5 @@ public final class UploadFile extends AbstractDescribableImpl <UploadFile> {
 	public void setRepository(String repository) {
 		this.repository = repository;
 	}
-
-	
-	@Extension
-	 public static class DescriptorImpl extends Descriptor<UploadFile> {
-		
-			@Override
-	        public String getDisplayName() { return ""; }
-			
-			public ListBoxModel doFillRepositoryItems() {
-				ListBoxModel items = new ListBoxModel();
-				
-				items.add("media");
-				items.add("datatables");
-				
-				return items;
-			}
-	  }
-	
 
 }

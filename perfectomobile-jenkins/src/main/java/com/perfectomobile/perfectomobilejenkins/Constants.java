@@ -20,5 +20,10 @@ public class Constants {
 	public static final String PARAM_TYPE_START_TAG = "(";
 	public static final String PARAM_TYPE_END_TAG = ")";
 	public static final String PARAM_NAME_VALUE_SEPARATOR = "=";
+	public static final String PARAM_REPOSITORYKEY_FILEPATH_SEPARATOR = ";";
+	public static final String PARAM_TYPE_MEDIA = "media";
+	public static final String PARAM_TYPE_DATATABLES = "datatables";
+	public static final int PARAM_TYPE_DATA_LENGTH = 5;
+	
 	
 }
