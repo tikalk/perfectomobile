@@ -28,10 +28,8 @@ public class UploadFileServiceTest {
 					"PRIVATE:/pictures/pic12.png",
 					fileName);
 		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

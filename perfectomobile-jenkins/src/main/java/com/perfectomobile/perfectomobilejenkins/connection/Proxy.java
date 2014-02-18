@@ -1,10 +1,14 @@
 package com.perfectomobile.perfectomobilejenkins.connection;
 
+import java.io.PrintStream;
+
+import com.perfectomobile.perfectomobilejenkins.Constants;
+
 import hudson.ProxyConfiguration;
 import jenkins.model.Jenkins;
 
 /**
- * 
+ * Get Jenkins proxy details
  * @author Guy
  *
  */
@@ -15,14 +19,14 @@ public class Proxy {
 	private  String proxyUser;
 	private  String proxyPassword;
 	private boolean isProxy;
+	private static final boolean isDebug = Boolean.valueOf(System.getProperty(Constants.PM_DEBUG_MODE));
 	
 	private static Proxy instance = null;
 
 	public static Proxy getInstance() {
 
-		//if (instance == null) {
-			instance = new Proxy();
-		//}
+		instance = new Proxy();
+
 		return instance;
 	}
 
@@ -45,20 +49,20 @@ public class Proxy {
 		}
 	}
 
-	public void print() {
+	public void print(PrintStream logger) {
 
-		if (Jenkins.getInstance() != null) {
+		if (Jenkins.getInstance() != null && isDebug) {
 			ProxyConfiguration proxy = Jenkins.getInstance().proxy;
 
 			if (proxy != null) {
 
-				System.out.println("proxy details:");
-				System.out.println("proxyHost=" + proxyHost);
-				System.out.println("proxyPort=" + proxyPort);
-				System.out.println("proxyUser=" + proxyUser);
-				System.out.println("proxyPassword=" + proxyPassword);
+				logger.println("proxy details:");
+				logger.println("proxyHost=" + proxyHost);
+				logger.println("proxyPort=" + proxyPort);
+				logger.println("proxyUser=" + proxyUser);
+				logger.println("proxyPassword=" + proxyPassword);
 			} else {
-				System.out.println("No proxy defined");
+				logger.println("No proxy defined");
 			}
 		}
 	}
@@ -86,7 +90,6 @@ public class Proxy {
 			hasCredentials = false;
 		}
 		
-		System.out.println("hasCredentials=" + hasCredentials);
 		return hasCredentials;
 	}
 	

@@ -101,55 +101,6 @@ public class PerfectoMobileBuilder extends Builder {
 	}
 	
 
-	/*public String getParameters() {
-
-		ClientResponse perfectoResponse = null;
-		StringBuffer returnParameters = new StringBuffer();
-
-		if (!scriptParams.trim().isEmpty()) {
-			returnParameters.append(scriptParams);
-		} else if (autoScript != null && autoScript != "") {
-
-			try {
-				//Call PM
-				perfectoResponse = RestServices
-						.getInstance()
-						.getRepoScriptsItems(
-								getDescriptor().getUrl(),
-								getDescriptor().getAccessId(),
-								getDescriptor().getSecretKey(),
-								autoScript);
-
-				if (perfectoResponse.getStatus() == Constants.PM_RESPONSE_STATUS_SUCCESS) {
-					File responseXml = perfectoResponse.getEntity(File.class);
-
-					Map <String, String> parametersMap = PMExecutionServices
-							.getScriptParameters(responseXml);
-
-					if (!parametersMap.isEmpty()) {
-						Set parameters = parametersMap.keySet();
-						Iterator iterator = parameters.iterator();
-						while (iterator.hasNext()) {
-							returnParameters
-									.append(iterator.next())
-									.append("=")
-									.append(System
-											.getProperty("line.separator"));
-						}
-					}
-				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ServletException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-
-		return returnParameters.toString();
-	}*/
-
 	@Override
 	public boolean perform(AbstractBuild build, Launcher launcher,
 			BuildListener listener) {
@@ -161,9 +112,6 @@ public class PerfectoMobileBuilder extends Builder {
 		RestServices.getInstance().setLogger(listener.getLogger());
 
 		try {
-			//Set proxy if exists
-			RestServices.getInstance().setProxy();
-			 
 			//Call PM to upload files into repository
 			PMExecutionServices.uploadFiles(getDescriptor(), build, listener, scriptParams);
 			
@@ -218,35 +166,28 @@ public class PerfectoMobileBuilder extends Builder {
 			}
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ServletException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
 		
-		//Call PM to get report
+		//Call PM to get report even if job fail
 		if (jsonExecutionStatusResult != null){
 			PMExecutionServices.getExecutionReport(getDescriptor(), build,
 					listener, jsonExecutionStatusResult);
 		}
 		
-		
+		//Decide if Jenkins job fail or not.
 		if (perfectoResponse.getStatus() == Constants.PM_RESPONSE_STATUS_SUCCESS
 				&& jobStatus == PMExecutionServices.JOB_STATUS_SUCCESS) {
-			//Call PM to get report
-			//PMExecutionServices.getExecutionReport(getDescriptor(), build,
-				//	listener, jsonExecutionStatusResult);
-			return true;
+			return true; //Success
 		} else {
-			return false;
+			return false; //Fail
 		}
 
 	}
@@ -327,10 +268,8 @@ public class PerfectoMobileBuilder extends Builder {
 						getUrl(), getAccessId(),
 						getSecretKey());
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (ServletException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
@@ -392,9 +331,7 @@ public class PerfectoMobileBuilder extends Builder {
 			url = formData.getString("url");
 			username = formData.getString("accessId");
 			password = formData.getString("secretKey");
-			// ^Can also use req.bindJSON(this, formData);
-			// (easier when there are many fields; need set* methods for this,
-			// like setUrl)
+
 			save();
 			return super.configure(req, formData);
 		}
@@ -471,6 +408,13 @@ public class PerfectoMobileBuilder extends Builder {
 					.error("Credentials refused, please check that your username and password are correct. HTTP Error " + perfectoResponse.getStatus());
 		}
 
+		/**
+		 * This method is called when the user press on "Parameter list" button.
+		 * @param req
+		 * @param rsp
+		 * @throws ServletException
+		 * @throws IOException
+		 */
 		public void doGetParameters(StaplerRequest req, StaplerResponse rsp)
 				throws ServletException, IOException {
 			String targetClass = getId();
@@ -500,8 +444,6 @@ public class PerfectoMobileBuilder extends Builder {
             String autoScriptJson =  builder.getString("autoScript");
 			retVal =getParameters(autoScriptJson.toString());
 			
-			System.out.println("List of parameters return:" + retVal);
-			
 			rsp.getWriter().append(retVal);	
 		}
 
@@ -527,7 +469,6 @@ public class PerfectoMobileBuilder extends Builder {
 								.getScriptParameters(responseXml);
 
 						if (!parametersMap.isEmpty()) {
-							//Set parameters = parametersMap.keySet();
 							Set<Entry<String, String>> parameters = parametersMap.entrySet();
 							Iterator<Entry<String, String>> iterator = parameters.iterator();
 							while (iterator.hasNext()) {
@@ -543,11 +484,9 @@ public class PerfectoMobileBuilder extends Builder {
 							}
 						}
 					}
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
+				} catch (IOException e) {			
 					e.printStackTrace();
 				} catch (ServletException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 

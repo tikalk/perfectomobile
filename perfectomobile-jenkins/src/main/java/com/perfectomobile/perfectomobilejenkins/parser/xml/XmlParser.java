@@ -37,15 +37,6 @@ public class XmlParser {
 		return instance;
 	}
 
-	public static void main(String[] args) {
-
-		// Map<String, String> something = getScriptParameters(new File(
-		// "/home/guy/Downloads/variables.xml"));
-
-		// System.out.println(something.toString());
-
-	}
-
 	public ArrayList<String> getXmlElements(File inputFile,
 			String elementNametoSearch) {
 
@@ -63,13 +54,10 @@ public class XmlParser {
 				elements.add(itemEelements.item(i).getTextContent());
 			}
 		} catch (ParserConfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (SAXException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -90,13 +78,10 @@ public class XmlParser {
 			DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
 			doc = docBuilder.parse(inputFile);
 		} catch (SAXException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ParserConfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 

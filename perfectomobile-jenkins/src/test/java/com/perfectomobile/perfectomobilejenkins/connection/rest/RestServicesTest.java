@@ -21,7 +21,7 @@ public class RestServicesTest {
 	@Test
 	public void testGetExecutionParametersOneParameter(){
 		
-		String params = "parameter1=dolphine";
+		String params = "parameter1(string)=dolphine";
 		
 		MultivaluedMap <String, String> paramMap = RestServices.getInstance().getQueryParamForOptinalParameters(params);
 		
@@ -31,22 +31,14 @@ public class RestServicesTest {
 	@Test
 	public void testGetExecutionParametersMultiParameter(){
 		
-		String params = "parameter1=Dolphine" + System.getProperty("line.separator") +
-				"parameter2=Ariel" + System.getProperty("line.separator") +
-				"parameter3=Jonathan" + System.getProperty("line.separator") +
-				"parameter4=Empire" + System.getProperty("line.separator");
+		String params = "parameter1(string)=Dolphine" + System.getProperty("line.separator") +
+				"parameter2(string)=Rona" + System.getProperty("line.separator") +
+				"parameter3(string)=Jonathan" + System.getProperty("line.separator") +
+				"parameter4(string)=Empire" + System.getProperty("line.separator");
 		
 		MultivaluedMap <String, String> paramMap = RestServices.getInstance().getQueryParamForOptinalParameters(params);
 		
 		System.out.println(paramMap.toString());
-	}
-	
-	@Test
-	public void testFile(){
-		
-		File file = new File("/tmp/readme.txt");
-		file.renameTo(new File ("/tmp/readme2.txt"));
-		System.out.println(file.getAbsolutePath());
 	}
 
 }

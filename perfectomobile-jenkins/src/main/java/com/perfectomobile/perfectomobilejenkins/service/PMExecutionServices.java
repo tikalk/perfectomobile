@@ -68,7 +68,6 @@ public class PMExecutionServices {
 			flowEndCode = JsonParser.getInstance().getElement(perfectoResponse,
 					Constants.PM_RESPONSE_NODE_FLOW_END_CODE);
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -105,8 +104,6 @@ public class PMExecutionServices {
 		NodeList nodeList = XmlParser.getInstance().getNodeList(inputFile,
 				XmlParser.PARAMETER_ELEMENT_NAME);
 
-		System.out
-				.println("===============================================================");
 
 		// do this the old way, because nodeList is not iterable
 		for (int itr = 0; itr < nodeList.getLength(); itr++) {
@@ -129,8 +126,6 @@ public class PMExecutionServices {
 			Element nameElement = (Element) nameNode;
 			paramName = nameElement.getTextContent();
 
-			System.out.println("param name" + " : " + paramName + " / "
-					+ "param type" + " : " + paramType);
 			scriptParams.put(paramName, paramType);
 		}
 
@@ -302,10 +297,8 @@ public class PMExecutionServices {
 							uploadFile.getRepositoryItemKey(),
 							new File(uploadFile.getFilePath()));
 				} catch (URISyntaxException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}

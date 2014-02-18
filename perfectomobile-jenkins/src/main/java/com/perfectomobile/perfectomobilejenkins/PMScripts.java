@@ -40,10 +40,8 @@ public class PMScripts {
 				perfectoResponse = RestServices.getInstance().getRepoScripts(
 						url, accessId, secretKey);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (ServletException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 

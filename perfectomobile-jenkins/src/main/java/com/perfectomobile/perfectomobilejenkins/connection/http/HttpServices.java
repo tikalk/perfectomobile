@@ -21,20 +21,19 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClients;
+
+import com.perfectomobile.perfectomobilejenkins.Constants;
 
 public class HttpServices {
 	
 	private static HttpServices instance = null;
-	private static boolean isDebug = Boolean.valueOf(System.getProperty("pmDebug"));
+	private static final boolean isDebug = Boolean.valueOf(System.getProperty(Constants.PM_DEBUG_MODE));
 	private static PrintStream logger = null;
 
 	protected HttpServices() {
@@ -63,6 +62,11 @@ public class HttpServices {
 	 * Set proxy on the client if available
 	 */
 	private void setProxy(HttpPost httpPost) {
+		
+		//Need this check for unit tests which runs wuthout jenkins 
+		if (Jenkins.getInstance() == null){
+			return;
+		}
 
 		ProxyConfiguration proxy = Jenkins.getInstance().proxy;
 		
@@ -115,8 +119,6 @@ public class HttpServices {
 		
 		HttpResponse response = sendRequest(uri, fileName);
         
-        System.out.println(response.getStatusLine().getStatusCode());
-        
         return response;
 	}
 	
@@ -147,7 +149,6 @@ public class HttpServices {
 			        new FileInputStream(file), -1);
 			
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	    reqEntity.setContentType("binary/octet-stream");
@@ -158,10 +159,8 @@ public class HttpServices {
 	    try {
 			response = httpClient.execute(httpPost);
 		} catch (ClientProtocolException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
             httpClient.close();

@@ -23,7 +23,7 @@ import com.sun.jersey.core.util.MultivaluedMapImpl;
 public class RestServices {
 
 	private static RestServices instance = null;
-	private static boolean isDebug = Boolean.valueOf(System.getProperty("pmDebug"));
+	private static final boolean isDebug = Boolean.valueOf(System.getProperty(Constants.PM_DEBUG_MODE));
 	private static PrintStream logger = null;
 
 	protected RestServices() {
@@ -318,27 +318,6 @@ public class RestServices {
 		return scriptParams;
 	}
 	
-
-	/**
-	 * Set proxy if available
-	 */
-	public void setProxy() {
-
-		if (Jenkins.getInstance() != null) {
-
-			ProxyConfiguration proxy = Jenkins.getInstance().proxy;
-
-			if (proxy != null) {
-				System.out.println("proxy details:");
-				System.out.println(proxy.getUserName());
-				System.out.println(proxy.getPassword());
-				System.out.println(proxy.name);
-				System.out.println(proxy.port);
-			} else {
-				System.out.println("No proxy available");
-			}
-		}
-	}
 
 	private Client createClient() {
 

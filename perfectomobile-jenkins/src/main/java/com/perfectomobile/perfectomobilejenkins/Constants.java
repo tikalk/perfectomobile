@@ -25,5 +25,7 @@ public class Constants {
 	public static final String PARAM_TYPE_DATATABLES = "datatables";
 	public static final int PARAM_TYPE_DATA_LENGTH = 5;
 	
+	public static final String PM_DEBUG_MODE="pmDebug";
+	
 	
 }
